@@ -1,37 +1,70 @@
 local function feedkeys(keys)
-  return vim.api.nvim_feedkeys(
-    vim.api.nvim_replace_termcodes(keys, true, false, true),
-    'm',
-    false
-  )
+  return vim.api.nvim_input(keys)
 end
 
 local function schedule(f)
   ---@diagnostic disable-next-line: param-type-mismatch
-  vim.defer_fn(f, 0)
+  vim.defer_fn(f, 5)
 end
 
 -- insert
-local function term_insert(key)
+local function term_insert(opts)
+  opts = opts or {}
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  if opts.d_row then
+    row = row + opts.d_row
+  end
+  if opts.d_col then
+    col = col + opts.d_col
+  end
   vim.cmd 'startinsert'
   schedule(function()
-    local new_row, new_col = unpack(vim.api.nvim_win_get_cursor(0))
-    if new_row == row then
-      if key == 'a' then
-        col = col + 1
-      end
-      while new_col ~= col do
-        if new_col > col then
-          feedkeys '<Left>'
-          new_col = new_col - 1
-        else
-          feedkeys '<Right>'
-          new_col = new_col + 1
+    local function _return()
+      if opts.post_nav then
+        local post_nav = opts.post_nav
+        while post_nav ~= 0 do
+          if post_nav > 0 then
+            feedkeys '<Right>'
+            post_nav = post_nav - 1
+          else
+            feedkeys '<Left>'
+            post_nav = post_nav + 1
+          end
         end
       end
     end
+
+    local function move(old_row, old_col)
+      local cur_row, cur_col = unpack(vim.api.nvim_win_get_cursor(0))
+      if
+        (cur_row == row and cur_col == col) -- reached destination
+        or (cur_row == old_row and cur_col == old_col) -- didn't move in last call
+      then
+        _return()
+        return
+      end
+      if cur_row > row then
+        feedkeys '<Left>'
+      elseif cur_row < row then
+        feedkeys '<Right>'
+      elseif cur_col > col then
+        feedkeys '<Left>'
+      else
+        feedkeys '<Right>'
+      end
+      schedule(function()
+        move(cur_row, cur_col)
+      end)
+    end
+
+    move()
   end)
+end
+
+local function map_insert(opts)
+  return function()
+    term_insert(opts)
+  end
 end
 
 local function create_autocmds(name, autocmds)
@@ -42,14 +75,16 @@ local function create_autocmds(name, autocmds)
   end
 end
 
+local function nmap(lhs, rhs)
+  vim.keymap.set('n', lhs, rhs, { buffer = true })
+end
+
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
-    vim.keymap.set('n', 'i', function()
-      term_insert 'i'
-    end, { buffer = true })
-    vim.keymap.set('n', 'a', function()
-      term_insert 'a'
-    end, { buffer = true })
+    nmap('i', map_insert())
+    nmap('a', map_insert { post_nav = 1 })
+    nmap('A', map_insert { d_col = 1000 })
+    nmap('I', map_insert { d_col = -1000 })
   end
 end
 
