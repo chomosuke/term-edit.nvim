@@ -42,21 +42,31 @@ local function create_autocmds(name, autocmds)
   end
 end
 
+local function maybe_enable()
+  if vim.bo.buftype == 'terminal' then
+    vim.keymap.set('n', 'i', function()
+      term_insert 'i'
+    end, { buffer = true })
+    vim.keymap.set('n', 'a', function()
+      term_insert 'a'
+    end, { buffer = true })
+  end
+end
+
 create_autocmds('term_enter_map_insert', {
   {
     event = 'OptionSet',
     opts = {
       pattern = 'buftype',
-      callback = function()
-        if vim.bo.buftype == 'terminal' then
-          vim.keymap.set('n', 'i', function()
-            term_insert 'i'
-          end, { buffer = true })
-          vim.keymap.set('n', 'a', function()
-            term_insert 'a'
-          end, { buffer = true })
-        end
-      end,
+      callback = maybe_enable,
+    },
+  },
+  { -- tolerate lazy loading
+    event = 'BufEnter',
+    opts = {
+      callback = maybe_enable,
     },
   },
 })
+
+maybe_enable() -- tolerate lazy loading
