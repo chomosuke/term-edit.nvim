@@ -30,8 +30,6 @@ local function term_insert(key)
           new_col = new_col + 1
         end
       end
-      local r, c = unpack(vim.api.nvim_win_get_cursor(0))
-      print(row, col, r, c, new_row, new_col)
     end
   end)
 end
