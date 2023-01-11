@@ -140,47 +140,24 @@ end
 --   vim.keymap.set('n', lhs, rhs, { buffer = true, remap = true })
 -- end
 
----return a function that call term_insert with opts as the options
----@param opts_f function function that returns InsertOpts
----@return function
-local function map_insert(opts_f)
-  return function()
-    enter_insert(opts_f())
-  end
-end
-
 ---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
-    map(
-      'i',
-      map_insert(function()
-        return { target = { line = vim.fn.line '.', col = vim.fn.col '.' } }
-      end)
-    )
-    map(
-      'a',
-      map_insert(function()
-        return {
-          target = { line = vim.fn.line '.', col = vim.fn.col '.' },
-          post_nav = 1,
-        }
-      end)
-    )
-    map(
-      'A',
-      map_insert(function()
-        -- very bottom
-        return { target = { line = vim.fn.line '$' + 1, col = 1 } }
-      end)
-    )
-    map(
-      'I',
-      map_insert(function()
-        -- very top
-        return { target = { line = 0, col = 1 } }
-      end)
-    )
+    map('i', function()
+      enter_insert { target = { line = vim.fn.line '.', col = vim.fn.col '.' } }
+    end)
+    map('a', function()
+      enter_insert {
+        target = { line = vim.fn.line '.', col = vim.fn.col '.' },
+        post_nav = 1,
+      }
+    end)
+    map('A', function()
+      enter_insert { target = { line = vim.fn.line '$' + 1, col = 1 } }
+    end)
+    map('I', function()
+      enter_insert { target = { line = 0, col = 1 } }
+    end)
   end
 end
 
