@@ -34,9 +34,10 @@ local function schedule(delay, f)
 end
 
 ---@class InsertOpts
----@field d_line integer
----@field d_col integer
----@field post_nav integer
+---@field d_line? integer
+---@field d_col? integer
+---@field post_nav? integer
+---@field callback? function This will be called after moving to the correct position
 
 ---Insert
 ---@param opts? InsertOpts
@@ -57,6 +58,9 @@ local function term_insert(opts)
   local function post()
     if opts.post_nav then
       move(opts.post_nav)
+    end
+    if opts.callback then
+      opts.callback()
     end
   end
 
@@ -97,7 +101,7 @@ local function term_insert(opts)
       end
       move(move_len)
     end
-    schedule(5, function()
+    schedule(M.opts.key_queue_time, function()
       move_row(cur_line, cur_col)
     end)
   end
@@ -177,6 +181,7 @@ maybe_enable() -- tolerate lazy loading
 
 M.opts = {
   debug = false,
+  key_queue_time = 5,
 }
 function M.setup(opts)
   opts = opts or {}
