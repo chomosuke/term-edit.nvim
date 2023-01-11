@@ -2,10 +2,17 @@ local function feedkeys(keys)
   return vim.api.nvim_input(keys)
 end
 
+local debug = false
+local function debug_print(...)
+  if debug then
+    print(...)
+  end
+end
+
 ---move right by len
 ---@param len integer negative mean move left
 local function move(len)
-  -- print('move_len: ', len)
+  debug_print('move_len: ', len)
   while len ~= 0 do
     if len > 0 then
       feedkeys '<Right>'
@@ -33,7 +40,7 @@ end
 ---Insert
 ---@param opts? InsertOpts
 local function term_insert(opts)
-  -- print 'start'
+  debug_print 'start'
   opts = opts or {}
   local target_line = vim.fn.line '.'
   local target_col = vim.fn.col '.'
@@ -43,7 +50,7 @@ local function term_insert(opts)
   if opts.d_col then
     target_col = target_col + opts.d_col
   end
-  -- print('target: ', target_line, target_col)
+  debug_print('target: ', target_line, target_col)
   vim.cmd 'startinsert'
 
   local function post()
@@ -55,7 +62,7 @@ local function term_insert(opts)
   local function move_col()
     local cur_line = vim.fn.line '.'
     local cur_col = vim.fn.col '.'
-    -- print('move_col: ', cur_line, cur_col)
+    debug_print('move_col: ', cur_line, cur_col)
     -- If not the same row means move_row reached end of command
     -- Don't move column anymore
     if cur_line == target_line then
@@ -67,7 +74,7 @@ local function term_insert(opts)
   local function move_row(old_line, old_col)
     local cur_line = vim.fn.line '.'
     local cur_col = vim.fn.col '.'
-    -- print('move_row: ', cur_line, cur_col)
+    debug_print('move_row: ', cur_line, cur_col)
     if
       (cur_line == target_line) -- reached destination
       or (cur_line == old_line and cur_col == old_col) -- didn't move in last call
