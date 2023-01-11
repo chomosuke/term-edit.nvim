@@ -6,6 +6,18 @@ local function debug_print(...)
   end
 end
 
+---@class Coord
+---@field col integer
+---@field line integer
+
+local function get_coord(expr)
+  return { line = vim.fn.line(expr), col = vim.fn.col(expr) }
+end
+
+local function equals(c1, c2)
+  return c1 and c2 and c1.line == c2.line and c1.col == c2.col
+end
+
 ---feedkeys
 ---@param keys string
 local function feedkeys(keys)
@@ -13,16 +25,12 @@ local function feedkeys(keys)
 end
 
 ---delay function f with vim.defer_fn by delay milliseconds
----@param delay integer
 ---@param f function
-local function schedule(delay, f)
+---@param delay? integer
+local function schedule(f, delay)
   ---@diagnostic disable-next-line: param-type-mismatch
-  vim.defer_fn(f, delay)
+  vim.defer_fn(f, delay or 0)
 end
-
----@class Coord
----@field col integer
----@field line integer
 
 ---move with move_fn until target is reached
 ---@param target Coord
@@ -30,7 +38,7 @@ end
 ---@param callback? function this function will be called after target is reached
 local function move_to(target, move_fn, callback)
   local function move_col()
-    local current = { line = vim.fn.line '.', col = vim.fn.col '.' }
+    local current = get_coord '.'
     debug_print('move_col: ', current.line, current.col)
     -- If not the same line means move_line reached end of command
     -- Don't move column anymore
@@ -44,13 +52,13 @@ local function move_to(target, move_fn, callback)
 
   local function move_line(old)
     old = old or {}
-    local current = { line = vim.fn.line '.', col = vim.fn.col '.' }
+    local current = get_coord '.'
     debug_print('move_line: ', current.line, current.col)
     if
-      (current.line == target.line) -- reached destination
-      or (current.line == old.line and current.col == old.col) -- didn't move in last call
+      current.line == target.line -- reached destination
+      or equals(current, old) -- didn't move in last call
     then
-      schedule(0, move_col)
+      schedule(move_col)
       return
     end
     -- if current.line == old.line, then previous keys haven't been processed yet
@@ -67,9 +75,9 @@ local function move_to(target, move_fn, callback)
       end
       move_fn(move_len)
     end
-    schedule(M.opts.key_queue_time, function()
+    schedule(function()
       move_line(current)
-    end)
+    end, M.opts.key_queue_time)
   end
 
   move_line()
@@ -78,7 +86,7 @@ end
 ---move right by len
 ---@param len integer negative mean move left
 local function move_by(len)
-  debug_print('move_len: ', len)
+  debug_print('move_by: ', len)
   while len ~= 0 do
     if len > 0 then
       feedkeys '<Right>'
@@ -96,7 +104,7 @@ local function enter_insert(opts)
   debug_print('target: ', opts.target.line, opts.target.col)
   vim.cmd 'startinsert'
 
-  schedule(0, function()
+  schedule(function()
     move_to(opts.target, move_by, function()
       if opts.post_nav then
         move_by(opts.post_nav)
@@ -130,10 +138,14 @@ end
 
 ---map keys
 ---@param lhs string
----@param rhs string|function
+---@param rhs function
 ---@param mode? string n by default
 local function map(lhs, rhs, mode)
-  vim.keymap.set(mode or 'n', lhs, rhs, { buffer = true })
+  mode = mode or 'n'
+  vim.keymap.set(mode, lhs, function()
+    debug_print('key', lhs, 'in mode', mode)
+    rhs()
+  end, { buffer = true })
 end
 
 -- local function remap(lhs, rhs)
@@ -144,19 +156,25 @@ end
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
     map('i', function()
-      enter_insert { target = { line = vim.fn.line '.', col = vim.fn.col '.' } }
+      enter_insert {
+        target = get_coord '.',
+      }
     end)
     map('a', function()
       enter_insert {
-        target = { line = vim.fn.line '.', col = vim.fn.col '.' },
+        target = get_coord '.',
         post_nav = 1,
       }
     end)
     map('A', function()
-      enter_insert { target = { line = vim.fn.line '$' + 1, col = 1 } }
+      enter_insert {
+        target = { line = vim.fn.line '$' + 1, col = 1 },
+      }
     end)
     map('I', function()
-      enter_insert { target = { line = 0, col = 1 } }
+      enter_insert {
+        target = { line = 0, col = 1 },
+      }
     end)
   end
 end
