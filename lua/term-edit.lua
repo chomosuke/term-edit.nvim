@@ -1,18 +1,83 @@
 local M = {}
 
-local function feedkeys(keys)
-  return vim.api.nvim_input(keys)
-end
-
 local function debug_print(...)
   if M.opts.debug then
     print(...)
   end
 end
 
+---feedkeys
+---@param keys string
+local function feedkeys(keys)
+  vim.api.nvim_input(keys)
+end
+
+---delay function f with vim.defer_fn by delay milliseconds
+---@param delay integer
+---@param f function
+local function schedule(delay, f)
+  ---@diagnostic disable-next-line: param-type-mismatch
+  vim.defer_fn(f, delay)
+end
+
+---@class Coord
+---@field col integer
+---@field line integer
+
+---move with move_fn until target is reached
+---@param target Coord
+---@param move_fn function
+---@param callback? function this function will be called after target is reached
+local function move_to(target, move_fn, callback)
+  local function move_col()
+    local current = { line = vim.fn.line '.', col = vim.fn.col '.' }
+    debug_print('move_col: ', current.line, current.col)
+    -- If not the same line means move_line reached end of command
+    -- Don't move column anymore
+    if current.line == target.line then
+      move_fn(target.col - current.col)
+    end
+    if callback then
+      callback()
+    end
+  end
+
+  local function move_line(old)
+    old = old or {}
+    local current = { line = vim.fn.line '.', col = vim.fn.col '.' }
+    debug_print('move_line: ', current.line, current.col)
+    if
+      (current.line == target.line) -- reached destination
+      or (current.line == old.line and current.col == old.col) -- didn't move in last call
+    then
+      schedule(0, move_col)
+      return
+    end
+    -- if current.line == old.line, then previous keys haven't been processed yet
+    -- Skip moving and wait one more event loop instead
+    if current.line ~= old.line then
+      local col_end = vim.fn.col '$'
+      local move_len
+      if current.line < target.line then
+        -- move to end + one right to move to line below
+        move_len = col_end - current.col
+      else
+        -- move to start + one left to move to line above
+        move_len = -current.col
+      end
+      move_fn(move_len)
+    end
+    schedule(M.opts.key_queue_time, function()
+      move_line(current)
+    end)
+  end
+
+  move_line()
+end
+
 ---move right by len
 ---@param len integer negative mean move left
-local function move(len)
+local function move_by(len)
   debug_print('move_len: ', len)
   while len ~= 0 do
     if len > 0 then
@@ -25,92 +90,36 @@ local function move(len)
   end
 end
 
----delay function f with vim.defer_fn by delay milliseconds
----@param delay integer
----@param f function
-local function schedule(delay, f)
-  ---@diagnostic disable-next-line: param-type-mismatch
-  vim.defer_fn(f, delay)
-end
-
----@class InsertOpts
----@field d_line? integer
----@field d_col? integer
----@field post_nav? integer
----@field callback? function This will be called after moving to the correct position
-
----Insert
----@param opts? InsertOpts
-local function term_insert(opts)
-  debug_print 'start'
-  opts = opts or {}
-  local target_line = vim.fn.line '.'
-  local target_col = vim.fn.col '.'
-  if opts.d_line then
-    target_line = target_line + opts.d_line
-  end
-  if opts.d_col then
-    target_col = target_col + opts.d_col
-  end
-  debug_print('target: ', target_line, target_col)
+---Enter insert mode
+---@param opts { callback?: function, post_nav?: integer, target: Coord }
+local function enter_insert(opts)
+  debug_print('target: ', opts.target.line, opts.target.col)
   vim.cmd 'startinsert'
 
-  local function post()
-    if opts.post_nav then
-      move(opts.post_nav)
-    end
-    if opts.callback then
-      opts.callback()
-    end
-  end
-
-  local function move_col()
-    local cur_line = vim.fn.line '.'
-    local cur_col = vim.fn.col '.'
-    debug_print('move_col: ', cur_line, cur_col)
-    -- If not the same row means move_row reached end of command
-    -- Don't move column anymore
-    if cur_line == target_line then
-      move(target_col - cur_col)
-    end
-    post()
-  end
-
-  local function move_row(old_line, old_col)
-    local cur_line = vim.fn.line '.'
-    local cur_col = vim.fn.col '.'
-    debug_print('move_row: ', cur_line, cur_col)
-    if
-      (cur_line == target_line) -- reached destination
-      or (cur_line == old_line and cur_col == old_col) -- didn't move in last call
-    then
-      schedule(0, move_col)
-      return
-    end
-    -- if cur_line == old_line, then previous keys haven't been processed yet
-    -- Skip moving and wait one more event loop instead
-    if cur_line ~= old_line then
-      local col_end = vim.fn.col '$'
-      local move_len
-      if cur_line < target_line then
-        -- move to end + one right to move to row below
-        move_len = col_end - cur_col
-      else
-        -- move to start + one left to move to row above
-        move_len = -cur_col
-      end
-      move(move_len)
-    end
-    schedule(M.opts.key_queue_time, function()
-      move_row(cur_line, cur_col)
-    end)
-  end
-
   schedule(0, function()
-    move_row()
+    move_to(opts.target, move_by, function()
+      if opts.post_nav then
+        move_by(opts.post_nav)
+      end
+      if opts.callback then
+        opts.callback()
+      end
+    end)
   end)
 end
 
+---@class AutocmdOpts
+---@field pattern? string[]|string
+---@field buffer? integer
+---@field desc? string
+---@field callback? function|string
+---@field command? string
+---@field once? boolean
+---@field nested? boolean
+
+---create autocmds
+---@param name string
+---@param autocmds { event: string[]|string, opts: AutocmdOpts }[]
 local function create_autocmds(name, autocmds)
   local id = vim.api.nvim_create_augroup(name, {})
   for _, autocmd in ipairs(autocmds) do
@@ -119,8 +128,12 @@ local function create_autocmds(name, autocmds)
   end
 end
 
-local function map(lhs, rhs)
-  vim.keymap.set('n', lhs, rhs, { buffer = true })
+---map keys
+---@param lhs string
+---@param rhs string|function
+---@param mode? string n by default
+local function map(lhs, rhs, mode)
+  vim.keymap.set(mode or 'n', lhs, rhs, { buffer = true })
 end
 
 -- local function remap(lhs, rhs)
@@ -128,34 +141,44 @@ end
 -- end
 
 ---return a function that call term_insert with opts as the options
----@param opts? table|function Option to pass to term_insert, or a function that returns option to term_insert
+---@param opts_f function function that returns InsertOpts
 ---@return function
-local function map_insert(opts)
+local function map_insert(opts_f)
   return function()
-    if type(opts) == 'function' then
-      term_insert(opts())
-    else
-      term_insert(opts)
-    end
+    enter_insert(opts_f())
   end
 end
 
+---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
-    map('i', map_insert())
-    map('a', map_insert { post_nav = 1 })
+    map(
+      'i',
+      map_insert(function()
+        return { target = { line = vim.fn.line '.', col = vim.fn.col '.' } }
+      end)
+    )
+    map(
+      'a',
+      map_insert(function()
+        return {
+          target = { line = vim.fn.line '.', col = vim.fn.col '.' },
+          post_nav = 1,
+        }
+      end)
+    )
     map(
       'A',
       map_insert(function()
         -- very bottom
-        return { d_line = vim.fn.line '$' }
+        return { target = { line = vim.fn.line '$' + 1, col = 1 } }
       end)
     )
     map(
       'I',
       map_insert(function()
         -- very top
-        return { d_line = -vim.fn.line '$' }
+        return { target = { line = 0, col = 1 } }
       end)
     )
   end
@@ -183,6 +206,9 @@ M.opts = {
   debug = false,
   key_queue_time = 5,
 }
+
+---set options for term-edit
+---@param opts { debug?: boolean, key_queue_time?: integer }
 function M.setup(opts)
   opts = opts or {}
   M.opts = vim.tbl_deep_extend('force', M.opts, opts)
