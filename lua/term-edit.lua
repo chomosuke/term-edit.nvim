@@ -1,10 +1,11 @@
+local M = {}
+
 local function feedkeys(keys)
   return vim.api.nvim_input(keys)
 end
 
-local debug = false
 local function debug_print(...)
-  if debug then
+  if M.opts.debug then
     print(...)
   end
 end
@@ -173,3 +174,13 @@ create_autocmds('term_enter_map_insert', {
 })
 
 maybe_enable() -- tolerate lazy loading
+
+M.opts = {
+  debug = false,
+}
+function M.setup(opts)
+  opts = opts or {}
+  M.opts = vim.tbl_deep_extend('force', M.opts, opts)
+end
+
+return M
