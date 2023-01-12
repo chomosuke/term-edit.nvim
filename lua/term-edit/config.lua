@@ -1,7 +1,7 @@
 local M = {
   opts = {
     debug = false,
-    feedkeys_delay = 1,
+    feedkeys_delay = 3,
   },
 }
 

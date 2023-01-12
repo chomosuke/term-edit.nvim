@@ -3,6 +3,7 @@ local insert = require 'term-edit.insert'
 local coord = require 'term-edit.coord'
 local config = require 'term-edit.config'
 local async = require 'term-edit.async'
+local delete = require 'term-edit.delete'
 local M = {
   setup = config.setup,
 }
@@ -43,6 +44,21 @@ end
 --   vim.keymap.set('n', lhs, rhs, { buffer = true, remap = true })
 -- end
 
+local function get_visual_range()
+  local start = coord.get_coord 'v'
+  local end_ = coord.get_coord '.'
+  if
+    end_.line < start.line
+    or (end_.line == start.line and end_.col < start.col)
+  then
+    utils.debug_print 'start end swap'
+    local temp = end_
+    end_ = start
+    start = temp
+  end
+  return start, end_
+end
+
 ---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
@@ -67,6 +83,12 @@ local function maybe_enable()
         target = { line = 0, col = 1 },
       }
     end)
+    map('c', function()
+      local start, end_ = get_visual_range()
+      async.feedkeys('<Esc>', function()
+        delete.delete_range(start, end_)
+      end)
+    end, 'x')
   end
 end
 
