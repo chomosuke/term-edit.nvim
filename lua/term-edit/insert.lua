@@ -23,7 +23,11 @@ function M.enter_insert(opts)
   async.vim_cmd('startinsert', function()
     navigate.navigate_with(opts.target, move_keys, function()
       if opts.post_nav then
-        async.feedkeys(move_keys(opts.post_nav), opts.callback)
+        async.feedkeys(
+          move_keys(opts.post_nav),
+          opts.callback,
+          { moves = true }
+        )
       end
     end)
   end)

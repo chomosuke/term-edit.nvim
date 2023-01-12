@@ -14,7 +14,10 @@ function M.navigate_with(target, move_keys, callback)
     -- If not the same line means move_line reached end of command
     -- Don't move column anymore
     if current.line == target.line then
-      async.feedkeys(move_keys(target.col - current.col), callback)
+      async.feedkeys(move_keys(target.col - current.col), callback, {
+        moves = true,
+        line_ranges = { { l1 = current.line, l2 = current.line } },
+      })
     end
   end
 
@@ -42,16 +45,16 @@ function M.navigate_with(target, move_keys, callback)
       expected_line = current.line - 1
     end
     old = current
-    async.feedkeys(move_keys(move_len), function()
-      navigate_line(old)
-    end, function()
-      local next = coord.get_coord '.'
-      local moved = not coord.equals(next, old)
-      old = next
-      return moved -- wait till it doesn't move
-        -- keep waiting if the line number isn't expected
-        or (next.line ~= expected_line and next.line ~= current.line)
-    end)
+    async.feedkeys(
+      move_keys(move_len),
+      function()
+        navigate_line(old)
+      end,
+      {
+        moves = true,
+        line_ranges = { { l1 = expected_line, l2 = current.line } },
+      }
+    )
   end
 
   navigate_line()
