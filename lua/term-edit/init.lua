@@ -1,9 +1,10 @@
 local utils = require 'term-edit.utils'
 local insert = require 'term-edit.insert'
 local coord = require 'term-edit.coord'
-local config= require 'term-edit.config'
+local config = require 'term-edit.config'
+local async = require 'term-edit.async'
 local M = {
-  setup = config.setup
+  setup = config.setup,
 }
 
 ---@class AutocmdOpts
@@ -45,6 +46,13 @@ end
 ---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
+    map('d', function()
+      async.vim_cmd('startinsert', function()
+        async.feedkeys('hehe', function()
+          async.feedkeys 'haehehey'
+        end)
+      end)
+    end)
     map('i', function()
       insert.enter_insert {
         target = coord.get_coord '.',
