@@ -19,7 +19,7 @@ end
 ---Enter insert mode
 ---@param opts { callback?: function, post_nav?: integer, target: Coord }
 function M.enter_insert(opts)
-  utils.debug_print('target: ', opts.target.line, opts.target.col)
+  utils.debug_print('enter_insert: target: ', utils.inspect(opts.target))
   async.vim_cmd('startinsert', function()
     navigate.navigate_with(opts.target, move_keys, function()
       if opts.post_nav then

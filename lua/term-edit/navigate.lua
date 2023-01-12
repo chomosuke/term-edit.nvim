@@ -10,7 +10,7 @@ local M = {}
 function M.navigate_with(target, move_keys, callback)
   local function navigate_col()
     local current = coord.get_coord '.'
-    utils.debug_print('move_col: ', current.line, current.col)
+    utils.debug_print('move_col: ', utils.inspect(current))
     -- If not the same line means move_line reached end of command
     -- Don't move column anymore
     if current.line == target.line then
@@ -21,7 +21,7 @@ function M.navigate_with(target, move_keys, callback)
   local function navigate_line(old)
     old = old or {}
     local current = coord.get_coord '.'
-    utils.debug_print('move_line: ', current.line, current.col)
+    utils.debug_print('move_line: ', utils.inspect(current))
     if
       current.line == target.line -- reached destination
       or coord.equals(current, old) -- didn't move in last call
