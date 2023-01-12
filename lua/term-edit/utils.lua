@@ -7,4 +7,8 @@ function M.debug_print(...)
   end
 end
 
+function M.inspect(obj)
+  return vim.inspect(obj, { newline = ' ', indent = '' })
+end
+
 return M
