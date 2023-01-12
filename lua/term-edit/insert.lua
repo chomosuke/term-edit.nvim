@@ -1,19 +1,18 @@
-local utils = require "term-edit.utils"
-local navigate  = require "term-edit.navigate"
+local utils = require 'term-edit.utils'
+local navigate = require 'term-edit.navigate'
+local async = require 'term-edit.async'
 local M = {}
 
 ---move right by len
 ---@param len integer negative mean move left
-local function move_by(len)
+local function move_keys(len)
   utils.debug_print('move_by: ', len)
-  while len ~= 0 do
-    if len > 0 then
-      utils.feedkeys '<Right>'
-      len = len - 1
-    else
-      utils.feedkeys '<Left>'
-      len = len + 1
-    end
+  if len > 0 then
+    return string.rep('<Right>', len)
+  elseif len < 0 then
+    return string.rep('<Left>', -len)
+  else
+    return ''
   end
 end
 
@@ -21,15 +20,10 @@ end
 ---@param opts { callback?: function, post_nav?: integer, target: Coord }
 function M.enter_insert(opts)
   utils.debug_print('target: ', opts.target.line, opts.target.col)
-  vim.cmd 'startinsert'
-
-  utils.schedule(function()
-    navigate.navigate_with(opts.target, move_by, function()
+  async.vim_cmd('startinsert', function()
+    navigate.navigate_with(opts.target, move_keys, function()
       if opts.post_nav then
-        move_by(opts.post_nav)
-      end
-      if opts.callback then
-        opts.callback()
+        async.feedkeys(move_keys(opts.post_nav), opts.callback)
       end
     end)
   end)
