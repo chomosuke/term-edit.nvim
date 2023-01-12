@@ -83,6 +83,14 @@ local function maybe_enable()
         target = { line = 0, col = 1 },
       }
     end)
+    map('d', function()
+      local start, end_ = get_visual_range()
+      async.feedkeys('<Esc>', function()
+        delete.delete_range(start, end_, function()
+          async.feedkeys '<C-\\><C-n>'
+        end)
+      end)
+    end, 'x')
     map('c', function()
       local start, end_ = get_visual_range()
       async.feedkeys('<Esc>', function()
