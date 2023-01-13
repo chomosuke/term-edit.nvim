@@ -24,11 +24,7 @@ function M.delete_range(start, end_, callback)
   )
 
   local function delete()
-    -- local current = coord.get_coord '.'
-    -- -- if end can't be reached, do nothing
-    -- if coord.equals(current, end_) then
     navigate.navigate_with(start, delete_keys, callback)
-    -- end
   end
 
   insert.enter_insert {
