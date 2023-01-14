@@ -18,6 +18,8 @@ function M.navigate_with(target, move_keys, callback)
         moves = true,
         line_ranges = { { l1 = current.line, l2 = current.line } },
       })
+    elseif callback then
+      callback()
     end
   end
 

@@ -19,7 +19,6 @@ local callback_index = 0
 ---@param defer_more function? will keep defering callback if this returns true
 local function register_callback(callback, defer_more)
   callback_index = (callback_index + 1) % 1000
-  callback = callback or function() end
   defer_more = defer_more or function()
     return false
   end
@@ -91,8 +90,11 @@ function M.feedkeys(keys, callback, opts)
 end
 
 function M.vim_cmd(cmd, callback)
-  register_callback(callback)
-  vim.cmd(cmd .. '\n' .. call_callback())
+  if callback then
+    register_callback(callback)
+    cmd = cmd .. '\n' .. call_callback()
+  end
+  vim.cmd(cmd)
 end
 
 return M

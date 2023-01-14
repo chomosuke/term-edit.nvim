@@ -64,21 +64,6 @@ local function omap(lhs, rhs, opts)
   end, opts)
 end
 
-local function get_visual_range()
-  local start = coord.get_coord 'v'
-  local end_ = coord.get_coord '.'
-  if
-    end_.line < start.line
-    or (end_.line == start.line and end_.col < start.col)
-  then
-    utils.debug_print 'start end swap'
-    local temp = end_
-    end_ = start
-    start = temp
-  end
-  return start, end_
-end
-
 ---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
@@ -100,9 +85,8 @@ local function maybe_enable()
 
     -- delete
     map('d', function()
-      local start, end_ = get_visual_range()
       async.feedkeys('<Esc>', function()
-        delete.delete_range(start, end_, {
+        delete.delete_range(coord.get_coord 'v', coord.get_coord '.', {
           callback = function()
             async.feedkeys '<C-\\><C-n>'
           end,
@@ -124,9 +108,8 @@ local function maybe_enable()
 
     -- change
     map('c', function()
-      local start, end_ = get_visual_range()
       async.feedkeys('<Esc>', function()
-        delete.delete_range(start, end_)
+        delete.delete_range(coord.get_coord 'v', coord.get_coord '.')
       end)
     end, { mode = 'x' })
     omap('c', function()
