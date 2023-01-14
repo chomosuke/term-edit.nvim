@@ -63,32 +63,28 @@ end
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
     map('i', function()
-      insert.enter_insert {
-        target = coord.get_coord '.',
-      }
+      insert.enter_insert(coord.get_coord '.')
     end)
     map('a', function()
-      insert.enter_insert {
-        target = coord.get_coord '.',
+      insert.enter_insert(coord.get_coord '.', {
         post_nav = 1,
-      }
+      })
     end)
     map('A', function()
-      insert.enter_insert {
-        target = { line = vim.fn.line '$' + 1, col = 1 },
-      }
+      insert.enter_insert { line = vim.fn.line '$' + 1, col = 1 }
     end)
     map('I', function()
-      insert.enter_insert {
-        target = { line = 0, col = 1 },
-      }
+      insert.enter_insert { line = 0, col = 1 }
     end)
     map('d', function()
       local start, end_ = get_visual_range()
       async.feedkeys('<Esc>', function()
-        delete.delete_range(start, end_, function()
-          async.feedkeys '<C-\\><C-n>'
-        end)
+        delete.delete_range(start, end_, {
+          callback = function()
+            async.feedkeys '<C-\\><C-n>'
+          end,
+          post_nav = 1,
+        })
       end)
     end, 'x')
     map('c', function()
