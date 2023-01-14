@@ -10,4 +10,4 @@ This is a work in progress. It might or might not work expected.
 - Visual delete: `d` in visual mode.
 
 ## Limitations
-term-edit.nvim assumes all characters takes up one space. It assumes there are no \<Tab\> or \<CR\> though it might tolerate it.
+term-edit.nvim assumes there are no \<Tab\> though it might tolerate it.
