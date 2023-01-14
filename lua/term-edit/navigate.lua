@@ -39,6 +39,10 @@ function M.navigate_with(target, move_keys, callback)
       -- move to end + one right to move to line below
       move_len = col_end - current.col
       expected_line = current.line + 1
+      if move_len == 0 then
+        -- encountered <CR>, need to move one more to get to the next line
+        move_len = 1
+      end
     else
       -- move to start + one left to move to line above
       move_len = -current.col
