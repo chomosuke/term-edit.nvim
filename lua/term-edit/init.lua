@@ -31,18 +31,38 @@ end
 ---map keys
 ---@param lhs string
 ---@param rhs function
----@param mode? string n by default
-local function map(lhs, rhs, mode)
-  mode = mode or 'n'
+---@param opts? { mode?: string }
+local function map(lhs, rhs, opts)
+  opts = opts or {}
+  local mode = opts.mode or 'n'
+  opts.mode = nil
+  opts = vim.tbl_deep_extend('force', { buffer = true }, opts)
   vim.keymap.set(mode, lhs, function()
     utils.debug_print('key', lhs, 'in mode', mode)
     rhs()
-  end, { buffer = true })
+  end, opts)
 end
 
--- local function remap(lhs, rhs)
---   vim.keymap.set('n', lhs, rhs, { buffer = true, remap = true })
--- end
+local function remap(lhs, rhs)
+  vim.keymap.set('n', lhs, rhs, { buffer = true, remap = true })
+end
+
+---map lhs<motion> to right handside in operator pending mode
+---@param lhs string
+---@param rhs function
+---@param opts? { mode?: string }
+local function omap(lhs, rhs, opts)
+  opts = opts or {}
+  local mode = opts.mode or 'n'
+  opts.mode = nil
+  opts = vim.tbl_deep_extend('force', { expr = true, buffer = true }, opts)
+  vim.keymap.set(mode, lhs, function()
+    utils.debug_print('key', lhs, 'in mode', mode)
+    _G.term_edit_operatorfunc = rhs
+    vim.opt.operatorfunc = 'v:lua.term_edit_operatorfunc'
+    return 'g@'
+  end, opts)
+end
 
 local function get_visual_range()
   local start = coord.get_coord 'v'
@@ -62,6 +82,7 @@ end
 ---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
+    -- insert
     map('i', function()
       insert.enter_insert(coord.get_coord '.')
     end)
@@ -76,6 +97,8 @@ local function maybe_enable()
     map('I', function()
       insert.enter_insert { line = 0, col = 1 }
     end)
+
+    -- delete
     map('d', function()
       local start, end_ = get_visual_range()
       async.feedkeys('<Esc>', function()
@@ -86,13 +109,33 @@ local function maybe_enable()
           post_nav = 1,
         })
       end)
-    end, 'x')
+    end, { mode = 'x' })
+    omap('d', function()
+      delete.delete_range(coord.get_coord "'[", coord.get_coord "']", {
+        callback = function()
+          async.feedkeys '<C-\\><C-n>'
+        end,
+        post_nav = 1,
+      })
+    end, { expr = true })
+    remap('dd', '0d$')
+    remap('D', 'd$')
+    remap('x', 'dl')
+
+    -- change
     map('c', function()
       local start, end_ = get_visual_range()
       async.feedkeys('<Esc>', function()
         delete.delete_range(start, end_)
       end)
-    end, 'x')
+    end, { mode = 'x' })
+    omap('c', function()
+      delete.delete_range(coord.get_coord "'[", coord.get_coord "']")
+    end, { expr = true })
+    remap('cc', '0c$')
+    remap('C', 'c$')
+    remap('s', 'cl')
+    remap('S', '0c$')
   end
 end
 
