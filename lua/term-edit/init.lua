@@ -85,8 +85,10 @@ local function maybe_enable()
 
     -- delete
     map('d', function()
+      local start = coord.get_coord 'v'
+      local end_ = coord.get_coord '.'
       async.feedkeys('<Esc>', function()
-        delete.delete_range(coord.get_coord 'v', coord.get_coord '.', {
+        delete.delete_range(start, end_, {
           callback = function()
             async.feedkeys '<C-\\><C-n>'
           end,
@@ -108,8 +110,10 @@ local function maybe_enable()
 
     -- change
     map('c', function()
+      local start = coord.get_coord 'v'
+      local end_ = coord.get_coord '.'
       async.feedkeys('<Esc>', function()
-        delete.delete_range(coord.get_coord 'v', coord.get_coord '.')
+        delete.delete_range(start, end_)
       end)
     end, { mode = 'x' })
     omap('c', function()
