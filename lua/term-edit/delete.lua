@@ -58,7 +58,7 @@ function M.delete_range(start, end_, opts)
     end
   end
 
-  insert.enter_insert(end_, {
+  insert.insert_at(end_, {
     callback = delete,
     post_nav = 1,
   })

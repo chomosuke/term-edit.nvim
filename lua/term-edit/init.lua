@@ -67,18 +67,18 @@ local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
     -- insert
     map('i', function()
-      insert.enter_insert(coord.get_coord '.')
+      insert.insert_at(coord.get_coord '.')
     end)
     map('a', function()
-      insert.enter_insert(coord.get_coord '.', {
+      insert.insert_at(coord.get_coord '.', {
         post_nav = 1,
       })
     end)
     map('A', function()
-      insert.enter_insert(coord.get_coord '$+')
+      insert.insert_at(coord.get_coord '$+')
     end)
     map('I', function()
-      insert.enter_insert(coord.get_coord '0')
+      insert.insert_at(coord.get_coord '0')
     end)
 
     -- delete
@@ -101,7 +101,7 @@ local function maybe_enable()
         end,
         post_nav = 1,
       })
-    end, { expr = true })
+    end)
     map('dd', function()
       delete.delete_range(
         coord.get_coord '0',
@@ -137,7 +137,7 @@ local function maybe_enable()
     end, { mode = 'x' })
     omap('c', function()
       delete.delete_range(coord.get_coord "'[", coord.get_coord "']")
-    end, { expr = true })
+    end)
     map('cc', function()
       delete.delete_range(coord.get_coord '0', coord.get_coord '$')
     end)

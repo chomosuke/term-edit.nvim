@@ -16,9 +16,9 @@ function M.move_keys(len)
   end
 end
 
----Enter insert mode
+---Enter insert mode and place cursor at target
 ---@param opts? { callback?: function, post_nav?: integer }
-function M.enter_insert(target, opts)
+function M.insert_at(target, opts)
   opts = opts or {}
   utils.debug_print('enter_insert: target: ', utils.inspect(target))
   async.vim_cmd('startinsert', function()
