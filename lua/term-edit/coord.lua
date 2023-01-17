@@ -23,6 +23,7 @@ local function find_line_start()
     lnum = lnum - 1
     if lnum < 1 then
       vim.notify('Can not find prompt_start: ' .. config.opts.prompt_start)
+      return { line = 1, col = 1 }
     end
 
     line = vim.fn.getline(lnum) --[[@as string]]
@@ -36,9 +37,10 @@ end
 
 local function find_line_end()
   local winwidth = get_winwidth()
+  local winheight = vim.fn.line '$'
   local lnum = vim.fn.line '.'
   local line = vim.fn.getline(lnum) --[[@as string]]
-  while #line == winwidth do
+  while #line == winwidth and lnum <= winheight do
     -- lnum don't end with <CR>
     lnum = lnum + 1
     line = vim.fn.getline(lnum) --[[@as string]]
