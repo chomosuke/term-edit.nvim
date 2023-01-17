@@ -4,11 +4,9 @@ local coord = require 'term-edit.coord'
 local config = require 'term-edit.config'
 local async = require 'term-edit.async'
 local delete = require 'term-edit.delete'
-local M = {
-  setup = config.setup,
-}
+local M = {}
 
----@class AutocmdOpts
+---@class AutoCmdOpts
 ---@field pattern? string[]|string
 ---@field buffer? integer
 ---@field desc? string
@@ -19,7 +17,7 @@ local M = {
 
 ---create autocmds
 ---@param name string
----@param autocmds { event: string[]|string, opts: AutocmdOpts }[]
+---@param autocmds { event: string[]|string, opts: AutoCmdOpts }[]
 local function create_autocmds(name, autocmds)
   local id = vim.api.nvim_create_augroup(name, {})
   for _, autocmd in ipairs(autocmds) do
@@ -128,22 +126,26 @@ local function maybe_enable()
   end
 end
 
-create_autocmds('term_enter_map_insert', {
-  {
-    event = 'OptionSet',
-    opts = {
-      pattern = 'buftype',
-      callback = maybe_enable,
-    },
-  },
-  { -- tolerate lazy loading
-    event = 'BufEnter',
-    opts = {
-      callback = maybe_enable,
-    },
-  },
-})
+function M.setup(opts)
+  config.setup(opts)
 
-maybe_enable() -- tolerate lazy loading
+  create_autocmds('term_enter_map_insert', {
+    {
+      event = 'OptionSet',
+      opts = {
+        pattern = 'buftype',
+        callback = maybe_enable,
+      },
+    },
+    { -- tolerate lazy loading
+      event = 'BufEnter',
+      opts = {
+        callback = maybe_enable,
+      },
+    },
+  })
+
+  maybe_enable() -- tolerate lazy loading
+end
 
 return M
