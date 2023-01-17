@@ -1,4 +1,5 @@
 local M = {
+  ---@type TermEditOpts
   opts = {
     debug = false,
     feedkeys_delay = 3,
@@ -7,8 +8,8 @@ local M = {
 
 ---@class TermEditOpts
 ---@field prompt_start string
----@field debug? boolean
----@field key_queue_time? integer
+---@field debug boolean
+---@field key_queue_time integer
 
 ---set options for term-edit
 ---@param opts TermEditOpts

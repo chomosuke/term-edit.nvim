@@ -75,10 +75,10 @@ local function maybe_enable()
       })
     end)
     map('A', function()
-      insert.enter_insert { line = vim.fn.line '$' + 1, col = 1 }
+      insert.enter_insert(coord.get_coord '$')
     end)
     map('I', function()
-      insert.enter_insert { line = 0, col = 1 }
+      insert.enter_insert(coord.get_coord '0')
     end)
 
     -- delete
@@ -102,8 +102,31 @@ local function maybe_enable()
         post_nav = 1,
       })
     end, { expr = true })
-    remap('dd', '0d$')
-    remap('D', 'd$')
+    map('dd', function()
+      local line_end = coord.get_coord '$'
+      delete.delete_range(
+        coord.get_coord '0',
+        { line = line_end.line, col = line_end.col + 1 },
+        {
+          callback = function()
+            async.feedkeys '<C-\\><C-n>'
+          end,
+          post_nav = 1,
+        }
+      )
+    end)
+    map('D', function()
+      local line_end = coord.get_coord '$'
+      delete.delete_range(
+        coord.get_coord '.',
+        { line = line_end.line, col = line_end.col + 1 },
+        {
+          callback = function()
+            async.feedkeys '<C-\\><C-n>'
+          end,
+        }
+      )
+    end)
     remap('x', 'dl')
 
     -- change
@@ -117,12 +140,20 @@ local function maybe_enable()
     omap('c', function()
       delete.delete_range(coord.get_coord "'[", coord.get_coord "']")
     end, { expr = true })
-    remap('cc', '0c$')
+    map('cc', function()
+      delete.delete_range(coord.get_coord '0', coord.get_coord '$')
+    end)
     remap('cw', 'ce')
     remap('cW', 'cE')
-    remap('C', 'c$')
+    map('C', function()
+      delete.delete_range(coord.get_coord '.', coord.get_coord '$', {
+        callback = function()
+          async.feedkeys '<C-\\><C-n>'
+        end,
+      })
+    end)
     remap('s', 'cl')
-    remap('S', '0c$')
+    remap('S', 'cc')
   end
 end
 
