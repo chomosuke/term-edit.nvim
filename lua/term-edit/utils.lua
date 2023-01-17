@@ -3,7 +3,7 @@ local M = {}
 
 function M.debug_print(...)
   if config.opts.debug then
-    print(...)
+    print(os.clock(), ...)
   end
 end
 

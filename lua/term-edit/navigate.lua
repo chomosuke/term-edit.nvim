@@ -16,7 +16,6 @@ function M.navigate_with(target, move_keys, callback)
     if current.line == target.line then
       async.feedkeys(move_keys(target.col - current.col), callback, {
         moves = true,
-        line_ranges = { { l1 = current.line, l2 = current.line } },
       })
     elseif callback then
       callback()
@@ -36,11 +35,9 @@ function M.navigate_with(target, move_keys, callback)
     end
     local col_end = vim.fn.col '$'
     local move_len
-    local expected_line
     if current.line < target.line then
       -- move to end + one right to move to line below
       move_len = col_end - current.col
-      expected_line = current.line + 1
       if move_len == 0 then
         -- encountered <CR>, need to move one more to get to the next line
         move_len = 1
@@ -48,7 +45,6 @@ function M.navigate_with(target, move_keys, callback)
     else
       -- move to start + one left to move to line above
       move_len = -current.col
-      expected_line = current.line - 1
     end
     old = current
     async.feedkeys(
@@ -58,7 +54,6 @@ function M.navigate_with(target, move_keys, callback)
       end,
       {
         moves = true,
-        line_ranges = { { l1 = expected_line, l2 = current.line } },
       }
     )
   end
