@@ -23,13 +23,17 @@ local function register_callback(callback, defer_more)
     return false
   end
   M.callbacks[callback_index] = function()
+    local start_time = os.clock()
     local event_loop_elapsed = 0
     local function schedule_callback()
-      if defer_more() then
-        event_loop_elapsed = 0
+      if os.clock() > start_time + 1 then
+        vim.notify('feedkeys callbacks leak', vim.log.levels.ERROR)
       end
       if event_loop_elapsed < config.opts.feedkeys_delay then
         event_loop_elapsed = event_loop_elapsed + 1
+        M.schedule(schedule_callback)
+      elseif defer_more() then
+        event_loop_elapsed = 0
         M.schedule(schedule_callback)
       else
         callback()
@@ -47,7 +51,7 @@ end
 ---Assume start in terminal mode, will execute callback in terminal mode
 ---@param keys string
 ---@param callback function? called after the keys are fed
----@param opts? { moves?: boolean, line_ranges?: { l1: integer, l2: integer }[] }
+---@param opts? { moves?: boolean }
 function M.feedkeys(keys, callback, opts)
   local old
   if callback then
@@ -61,23 +65,7 @@ function M.feedkeys(keys, callback, opts)
       old = current
 
       -- wait till it doesn't move if the keys moves
-      local defer_more = opts.moves and moved
-
-      if opts.line_ranges then
-        -- wait till line is withing range
-        local in_range = false
-        for _, line_range in pairs(opts.line_ranges) do
-          if
-            current.line <= math.max(line_range.l1, line_range.l2)
-            and current.line >= math.min(line_range.l1, line_range.l2)
-          then
-            in_range = true
-            break
-          end
-        end
-        defer_more = defer_more or not in_range
-      end
-      return defer_more
+      return opts.moves and moved
     end)
     keys = keys
       .. '<C-\\><C-n>' -- exit terminal mode
