@@ -7,7 +7,7 @@ local M = {}
 
 local function delete_keys(len)
   assert(len < 0, len)
-  print('delete_by:', len)
+  utils.debug_print('delete_by:', len)
   return string.rep('<BS>', -len)
 end
 
