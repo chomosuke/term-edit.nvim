@@ -126,6 +126,8 @@ local function maybe_enable()
   end
 end
 
+---setup term-edit
+---@param opts TermEditOpts
 function M.setup(opts)
   config.setup(opts)
 
