@@ -25,10 +25,9 @@ function M.delete_range(start, end_, opts)
     utils.inspect(end_)
   )
 
-  if
-    end_.line < start.line
-    or (end_.line == start.line and end_.col < start.col)
-  then
+  vim.fn.setreg('"', coord.get_text_between(start, end_))
+
+  if coord.before(end_, start) then
     utils.debug_print 'start end swap'
     local temp = end_
     end_ = start
