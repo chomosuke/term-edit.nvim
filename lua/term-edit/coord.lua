@@ -80,4 +80,11 @@ function M.get_text_between(m1, m2)
   return table.concat(lines, '\n')
 end
 
+function M.add(c1, c2)
+  return {
+    line = (c1.line or 0) + (c2.line or 0),
+    col = (c1.col or 0) + (c2.col or 0),
+  }
+end
+
 return M
