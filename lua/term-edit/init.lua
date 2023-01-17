@@ -4,11 +4,9 @@ local coord = require 'term-edit.coord'
 local config = require 'term-edit.config'
 local async = require 'term-edit.async'
 local delete = require 'term-edit.delete'
-local M = {
-  setup = config.setup,
-}
+local M = {}
 
----@class AutocmdOpts
+---@class AutoCmdOpts
 ---@field pattern? string[]|string
 ---@field buffer? integer
 ---@field desc? string
@@ -19,7 +17,7 @@ local M = {
 
 ---create autocmds
 ---@param name string
----@param autocmds { event: string[]|string, opts: AutocmdOpts }[]
+---@param autocmds { event: string[]|string, opts: AutoCmdOpts }[]
 local function create_autocmds(name, autocmds)
   local id = vim.api.nvim_create_augroup(name, {})
   for _, autocmd in ipairs(autocmds) do
@@ -77,10 +75,10 @@ local function maybe_enable()
       })
     end)
     map('A', function()
-      insert.enter_insert { line = vim.fn.line '$' + 1, col = 1 }
+      insert.enter_insert(coord.get_coord '$')
     end)
     map('I', function()
-      insert.enter_insert { line = 0, col = 1 }
+      insert.enter_insert(coord.get_coord '0')
     end)
 
     -- delete
@@ -104,8 +102,31 @@ local function maybe_enable()
         post_nav = 1,
       })
     end, { expr = true })
-    remap('dd', '0d$')
-    remap('D', 'd$')
+    map('dd', function()
+      local line_end = coord.get_coord '$'
+      delete.delete_range(
+        coord.get_coord '0',
+        { line = line_end.line, col = line_end.col + 1 },
+        {
+          callback = function()
+            async.feedkeys '<C-\\><C-n>'
+          end,
+          post_nav = 1,
+        }
+      )
+    end)
+    map('D', function()
+      local line_end = coord.get_coord '$'
+      delete.delete_range(
+        coord.get_coord '.',
+        { line = line_end.line, col = line_end.col + 1 },
+        {
+          callback = function()
+            async.feedkeys '<C-\\><C-n>'
+          end,
+        }
+      )
+    end)
     remap('x', 'dl')
 
     -- change
@@ -119,31 +140,45 @@ local function maybe_enable()
     omap('c', function()
       delete.delete_range(coord.get_coord "'[", coord.get_coord "']")
     end, { expr = true })
-    remap('cc', '0c$')
+    map('cc', function()
+      delete.delete_range(coord.get_coord '0', coord.get_coord '$')
+    end)
     remap('cw', 'ce')
     remap('cW', 'cE')
-    remap('C', 'c$')
+    map('C', function()
+      delete.delete_range(coord.get_coord '.', coord.get_coord '$', {
+        callback = function()
+          async.feedkeys '<C-\\><C-n>'
+        end,
+      })
+    end)
     remap('s', 'cl')
-    remap('S', '0c$')
+    remap('S', 'cc')
   end
 end
 
-create_autocmds('term_enter_map_insert', {
-  {
-    event = 'OptionSet',
-    opts = {
-      pattern = 'buftype',
-      callback = maybe_enable,
-    },
-  },
-  { -- tolerate lazy loading
-    event = 'BufEnter',
-    opts = {
-      callback = maybe_enable,
-    },
-  },
-})
+---setup term-edit
+---@param opts TermEditOpts
+function M.setup(opts)
+  config.setup(opts)
 
-maybe_enable() -- tolerate lazy loading
+  create_autocmds('term_enter_map_insert', {
+    {
+      event = 'OptionSet',
+      opts = {
+        pattern = 'buftype',
+        callback = maybe_enable,
+      },
+    },
+    { -- tolerate lazy loading
+      event = 'BufEnter',
+      opts = {
+        callback = maybe_enable,
+      },
+    },
+  })
+
+  maybe_enable() -- tolerate lazy loading
+end
 
 return M
