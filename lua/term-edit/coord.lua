@@ -35,7 +35,7 @@ local function find_line_start()
   end
 end
 
-local function find_line_end()
+local function find_line_end(include_cr)
   local winwidth = get_winwidth()
   local winheight = vim.fn.line '$'
   local lnum = vim.fn.line '.'
@@ -45,7 +45,11 @@ local function find_line_end()
     lnum = lnum + 1
     line = vim.fn.getline(lnum) --[[@as string]]
   end
-  return { line = lnum, col = #line }
+  local col = #line
+  if include_cr and col ~= 1 then
+    col = col + 1
+  end
+  return { line = lnum, col = col }
 end
 
 ---get coord with expr, '.' is cursor, '0' is start of the line
@@ -55,8 +59,8 @@ end
 function M.get_coord(expr)
   if expr == '0' then
     return find_line_start()
-  elseif expr == '$' then
-    return find_line_end()
+  elseif expr == '$' or expr == '$+' then
+    return find_line_end(expr == '$+')
   else
     return { line = vim.fn.line(expr), col = vim.fn.col(expr) }
   end

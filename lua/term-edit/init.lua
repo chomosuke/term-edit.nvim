@@ -75,7 +75,7 @@ local function maybe_enable()
       })
     end)
     map('A', function()
-      insert.enter_insert(coord.add(coord.get_coord '$', { col = 1 }))
+      insert.enter_insert(coord.get_coord '$+')
     end)
     map('I', function()
       insert.enter_insert(coord.get_coord '0')
@@ -105,7 +105,7 @@ local function maybe_enable()
     map('dd', function()
       delete.delete_range(
         coord.get_coord '0',
-        coord.add(coord.get_coord '$', { col = 1 }),
+        coord.get_coord '$+',
         {
           callback = function()
             async.feedkeys '<C-\\><C-n>'
@@ -117,7 +117,7 @@ local function maybe_enable()
     map('D', function()
       delete.delete_range(
         coord.get_coord '.',
-        coord.add(coord.get_coord '$', { col = 1 }),
+        coord.get_coord '$+',
         {
           callback = function()
             async.feedkeys '<C-\\><C-n>'
