@@ -66,14 +66,26 @@ function M.get_coord(expr)
   end
 end
 
+---check if 2 coords are equal
+---@param c1 Coord
+---@param c2 Coord
+---@return boolean
 function M.equals(c1, c2)
   return c1 and c2 and c1.line == c2.line and c1.col == c2.col
 end
 
+---check if first coord is before the second coord
+---@param c1 Coord
+---@param c2 Coord
+---@return boolean
 function M.before(c1, c2)
   return c1.line < c2.line or (c1.line == c2.line and c1.col < c2.col)
 end
 
+---get text between the two coords
+---@param m1 Coord
+---@param m2 Coord
+---@return string
 function M.get_text_between(m1, m2)
   if M.before(m2, m1) then
     local temp = m1
@@ -92,6 +104,10 @@ function M.get_text_between(m1, m2)
   return table.concat(lines, '')
 end
 
+---add two coords and return the result
+---@param c1 Coord
+---@param c2 Coord
+---@return Coord
 function M.add(c1, c2)
   return {
     line = (c1.line or 0) + (c2.line or 0),
