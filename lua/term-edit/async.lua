@@ -88,6 +88,8 @@ function M.quit_insert(callback)
   vim.api.nvim_input(keys)
 end
 
+---paste register content
+---@param register string
 function M.put(register)
   vim.api.nvim_put(
     ---@diagnostic disable-next-line: param-type-mismatch
@@ -98,6 +100,9 @@ function M.put(register)
   )
 end
 
+---execute command and then maybe call callback
+---@param cmd string
+---@param callback? function
 function M.vim_cmd(cmd, callback)
   if callback then
     register_callback(callback)
