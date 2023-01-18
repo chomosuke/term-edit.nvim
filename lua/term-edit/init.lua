@@ -164,6 +164,11 @@ local function maybe_enable()
             callback = function()
               async.quit_insert(function()
                 async.put(r)
+                async.schedule(function()
+                  async.vim_cmd('startinsert', function()
+                    async.schedule(async.quit_insert, 5)
+                  end)
+                end, 5)
               end)
             end,
           })
@@ -187,6 +192,11 @@ local function maybe_enable()
                     false,
                     false
                   )
+                  async.schedule(function()
+                    async.vim_cmd('startinsert', function()
+                      async.schedule(async.quit_insert, 5)
+                    end)
+                  end, 5)
                 end)
               end,
             })
