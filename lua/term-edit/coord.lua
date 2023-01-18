@@ -81,9 +81,15 @@ function M.get_text_between(m1, m2)
     m2 = temp
   end
   local lines = vim.fn.getline(m1.line, m2.line)
+  local winwidth = get_winwidth()
+  for i, _ in ipairs(lines) do
+    if #lines[i] < winwidth then
+      lines[i] = lines[i] .. '\n'
+    end
+  end
   lines[#lines] = string.sub(lines[#lines], 1, m2.col)
   lines[1] = string.sub(lines[1], m1.col, #lines[1])
-  return table.concat(lines, '\n')
+  return table.concat(lines, '')
 end
 
 function M.add(c1, c2)
