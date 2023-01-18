@@ -65,6 +65,11 @@ end
 ---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
+    -- insert and that's it
+    map('<C-i>', function()
+      vim.cmd 'startinsert'
+    end)
+
     -- insert
     map('i', function()
       insert.insert_at(coord.get_coord '.')
