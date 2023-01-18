@@ -3,6 +3,7 @@ local insert_map = require 'term-edit.map.insert_map'
 local delete_map = require 'term-edit.map.delete_map'
 local change_map = require 'term-edit.map.change_map'
 local paste_map = require 'term-edit.map.paste_map'
+local replace_map = require 'term-edit.map.replace_map'
 local M = {}
 
 ---@class AutoCmdOpts
@@ -32,6 +33,7 @@ local function maybe_enable()
     delete_map.enable()
     change_map.enable()
     paste_map.enable()
+    replace_map.enable()
   end
 end
 
