@@ -12,7 +12,7 @@ local function delete_keys(len)
 end
 
 ---Delete all character from start to end inclusive
----Start in
+---Start in normal mode, end in insert mode
 ---@param start Coord
 ---@param end_ Coord
 ---@param opts? { callback?: function, post_nav?: integer }

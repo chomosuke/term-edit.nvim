@@ -14,6 +14,7 @@ This is a work in progress. It might or might not work expected.
 - Visual change: `c` in visual mode.
 - Visual delete: `d` in visual mode.
 - Paste: `p` `P` `"<register>p` `"<register>P`
+- Replace: `r` in normal mode
 
 ## Limitations
 term-edit.nvim assumes there are no \<Tab\> though it might tolerate it.

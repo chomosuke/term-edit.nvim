@@ -47,15 +47,11 @@ function M.navigate_with(target, move_keys, callback)
       move_len = -current.col
     end
     old = current
-    async.feedkeys(
-      move_keys(move_len),
-      function()
-        navigate_line(old)
-      end,
-      {
-        moves = true,
-      }
-    )
+    async.feedkeys(move_keys(move_len), function()
+      navigate_line(old)
+    end, {
+      moves = true,
+    })
   end
 
   navigate_line()

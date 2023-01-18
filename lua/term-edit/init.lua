@@ -1,9 +1,9 @@
-local utils = require 'term-edit.utils'
-local insert = require 'term-edit.insert'
-local coord = require 'term-edit.coord'
 local config = require 'term-edit.config'
-local async = require 'term-edit.async'
-local delete = require 'term-edit.delete'
+local insert_map = require 'term-edit.map.insert_map'
+local delete_map = require 'term-edit.map.delete_map'
+local change_map = require 'term-edit.map.change_map'
+local paste_map = require 'term-edit.map.paste_map'
+local replace_map = require 'term-edit.map.replace_map'
 local M = {}
 
 ---@class AutoCmdOpts
@@ -26,188 +26,14 @@ local function create_autocmds(name, autocmds)
   end
 end
 
----map keys
----@param lhs string
----@param rhs function
----@param opts? { mode?: string }
-local function map(lhs, rhs, opts)
-  opts = opts or {}
-  local mode = opts.mode or 'n'
-  opts.mode = nil
-  opts = vim.tbl_deep_extend('force', { buffer = true }, opts)
-  vim.keymap.set(mode, lhs, function()
-    utils.debug_print('key', lhs, 'in mode', mode)
-    rhs()
-  end, opts)
-end
-
-local function remap(lhs, rhs, opts)
-  opts = opts or {}
-  local mode = opts.mode or 'n'
-  vim.keymap.set(mode, lhs, rhs, { buffer = true, remap = true })
-end
-
----map lhs<motion> to right handside in operator pending mode
----@param lhs string
----@param rhs function
----@param opts? { mode?: string }
-local function omap(lhs, rhs, opts)
-  opts = opts or {}
-  local mode = opts.mode or 'n'
-  opts.mode = nil
-  opts = vim.tbl_deep_extend('force', { expr = true, buffer = true }, opts)
-  vim.keymap.set(mode, lhs, function()
-    utils.debug_print('key', lhs, 'in mode', mode)
-    _G.term_edit_operatorfunc = rhs
-    vim.opt.operatorfunc = 'v:lua.term_edit_operatorfunc'
-    return 'g@'
-  end, opts)
-end
-
 ---enable this plugin for the buffer if buf type is terminal
 local function maybe_enable()
   if vim.bo.buftype == 'terminal' then
-    -- insert and that's it
-    map('<C-i>', function()
-      vim.cmd 'startinsert'
-    end)
-
-    -- insert
-    map('i', function()
-      insert.insert_at(coord.get_coord '.')
-    end)
-    map('a', function()
-      insert.insert_at(coord.get_coord '.', {
-        post_nav = 1,
-      })
-    end)
-    map('A', function()
-      insert.insert_at(coord.get_coord '$+')
-    end)
-    map('I', function()
-      insert.insert_at(coord.get_coord '0')
-    end)
-
-    -- delete
-    map('d', function()
-      local start = coord.get_coord 'v'
-      local end_ = coord.get_coord '.'
-      async.feedkeys('<Esc>', function()
-        delete.delete_range(start, end_, {
-          callback = function()
-            async.quit_insert()
-          end,
-          post_nav = 1,
-        })
-      end)
-    end, { mode = 'x' })
-    omap('d', function()
-      delete.delete_range(coord.get_coord "'[", coord.get_coord "']", {
-        callback = function()
-          async.quit_insert()
-        end,
-        post_nav = 1,
-      })
-    end)
-    map('dd', function()
-      delete.delete_range(coord.get_coord '0', coord.get_coord '$+', {
-        callback = function()
-          async.quit_insert()
-        end,
-        post_nav = 1,
-      })
-    end)
-    map('D', function()
-      delete.delete_range(coord.get_coord '.', coord.get_coord '$+', {
-        callback = function()
-          async.quit_insert()
-        end,
-      })
-    end)
-    remap('x', 'dl')
-
-    -- change
-    map('c', function()
-      local start = coord.get_coord 'v'
-      local end_ = coord.get_coord '.'
-      async.feedkeys('<Esc>', function()
-        delete.delete_range(start, end_)
-      end)
-    end, { mode = 'x' })
-    omap('c', function()
-      delete.delete_range(coord.get_coord "'[", coord.get_coord "']")
-    end)
-    map('cc', function()
-      delete.delete_range(coord.get_coord '0', coord.get_coord '$')
-    end)
-    remap('cw', 'ce')
-    remap('cW', 'cE')
-    map('C', function()
-      delete.delete_range(coord.get_coord '.', coord.get_coord '$', {
-        callback = function()
-          async.quit_insert()
-        end,
-      })
-    end)
-    remap('s', 'cl')
-    remap('S', 'cc')
-
-    -- paste
-    local registers =
-      '"0123456789-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:.%#=*+_/'
-    for r in registers:gmatch '.' do
-      for p in ('pP'):gmatch '.' do
-        -- normal mode
-        map('"' .. r .. p, function()
-          insert.insert_at(coord.get_coord '.', {
-            post_nav = p == 'p' and 1 or 0,
-            callback = function()
-              async.quit_insert(function()
-                async.put(r)
-                async.schedule(function()
-                  async.vim_cmd('startinsert', function()
-                    async.schedule(async.quit_insert, 5)
-                  end)
-                end, 5)
-              end)
-            end,
-          })
-        end)
-
-        -- virtual mode
-        map('"' .. r .. p, function()
-          local start = coord.get_coord 'v'
-          local end_ = coord.get_coord '.'
-          ---@diagnostic disable-next-line: param-type-mismatch
-          local content = vim.fn.getreg(r, nil, true)
-          local regtype = vim.fn.getregtype(r)
-          async.feedkeys('<Esc>', function()
-            delete.delete_range(start, end_, {
-              callback = function()
-                async.quit_insert(function()
-                  vim.api.nvim_put(
-                    ---@diagnostic disable-next-line: param-type-mismatch
-                    content,
-                    regtype,
-                    false,
-                    false
-                  )
-                  async.schedule(function()
-                    async.vim_cmd('startinsert', function()
-                      async.schedule(async.quit_insert, 5)
-                    end)
-                  end, 5)
-                end)
-              end,
-            })
-          end)
-        end, { mode = 'x' })
-      end
-    end
-    remap('p', '""p')
-    remap('P', '""P')
-    remap('p', '""p', { mode = 'x' })
-    remap('P', '""P', { mode = 'x' })
+    insert_map.enable()
+    delete_map.enable()
+    change_map.enable()
+    paste_map.enable()
+    replace_map.enable()
   end
 end
 
