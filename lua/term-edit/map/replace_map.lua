@@ -19,7 +19,7 @@ function M.enable()
         post_nav = 1,
       })
     end)
-  end, { expr = true })
+  end)
 end
 
 return M
