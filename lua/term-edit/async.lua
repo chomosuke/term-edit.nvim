@@ -53,8 +53,8 @@ end
 ---@param callback function? called after the keys are fed
 ---@param opts? { moves?: boolean }
 function M.feedkeys(keys, callback, opts)
-  local old
   if callback then
+    local old
     register_callback(callback, function()
       if not opts then
         return false
@@ -73,6 +73,17 @@ function M.feedkeys(keys, callback, opts)
       .. 'startinsert | ' -- get back to terminal mode
       .. call_callback()
       .. '<CR>'
+  end
+  vim.api.nvim_input(keys)
+end
+
+---quit insert (terminal) mode
+---@param callback? function
+function M.quit_insert(callback)
+  local keys = '<C-\\><C-n>' -- exit terminal mode
+  if callback then
+    register_callback(callback)
+    keys = keys .. '<cmd>' .. call_callback() .. '<CR>'
   end
   vim.api.nvim_input(keys)
 end

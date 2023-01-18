@@ -93,7 +93,7 @@ local function maybe_enable()
       async.feedkeys('<Esc>', function()
         delete.delete_range(start, end_, {
           callback = function()
-            async.feedkeys '<C-\\><C-n>'
+            async.quit_insert()
           end,
           post_nav = 1,
         })
@@ -102,33 +102,25 @@ local function maybe_enable()
     omap('d', function()
       delete.delete_range(coord.get_coord "'[", coord.get_coord "']", {
         callback = function()
-          async.feedkeys '<C-\\><C-n>'
+          async.quit_insert()
         end,
         post_nav = 1,
       })
     end)
     map('dd', function()
-      delete.delete_range(
-        coord.get_coord '0',
-        coord.get_coord '$+',
-        {
-          callback = function()
-            async.feedkeys '<C-\\><C-n>'
-          end,
-          post_nav = 1,
-        }
-      )
+      delete.delete_range(coord.get_coord '0', coord.get_coord '$+', {
+        callback = function()
+          async.quit_insert()
+        end,
+        post_nav = 1,
+      })
     end)
     map('D', function()
-      delete.delete_range(
-        coord.get_coord '.',
-        coord.get_coord '$+',
-        {
-          callback = function()
-            async.feedkeys '<C-\\><C-n>'
-          end,
-        }
-      )
+      delete.delete_range(coord.get_coord '.', coord.get_coord '$+', {
+        callback = function()
+          async.quit_insert()
+        end,
+      })
     end)
     remap('x', 'dl')
 
@@ -151,12 +143,51 @@ local function maybe_enable()
     map('C', function()
       delete.delete_range(coord.get_coord '.', coord.get_coord '$', {
         callback = function()
-          async.feedkeys '<C-\\><C-n>'
+          async.quit_insert()
         end,
       })
     end)
     remap('s', 'cl')
     remap('S', 'cc')
+
+    -- paste
+    local registers =
+      '"0123456789-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:.%#=*+_/'
+    for r in registers:gmatch '.' do
+      map('"' .. r .. 'p', function()
+        insert.insert_at(coord.get_coord '.', {
+          post_nav = 1,
+          callback = function()
+            async.quit_insert(function()
+              vim.api.nvim_put(
+                ---@diagnostic disable-next-line: param-type-mismatch
+                vim.fn.getreg(r, nil, true),
+                vim.fn.getregtype(r),
+                false,
+                false
+              )
+            end)
+          end,
+        })
+      end)
+      map('"' .. r .. 'P', function()
+        insert.insert_at(coord.get_coord '.', {
+          callback = function()
+            async.quit_insert(function()
+              vim.api.nvim_put(
+                ---@diagnostic disable-next-line: param-type-mismatch
+                vim.fn.getreg(r, nil, true),
+                vim.fn.getregtype(r),
+                false,
+                false
+              )
+            end)
+          end,
+        })
+      end)
+    end
+    remap('p', '""p')
+    remap('P', '""P')
   end
 end
 
