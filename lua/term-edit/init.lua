@@ -41,8 +41,10 @@ local function map(lhs, rhs, opts)
   end, opts)
 end
 
-local function remap(lhs, rhs)
-  vim.keymap.set('n', lhs, rhs, { buffer = true, remap = true })
+local function remap(lhs, rhs, opts)
+  opts = opts or {}
+  local mode = opts.mode or 'n'
+  vim.keymap.set(mode, lhs, rhs, { buffer = true, remap = true })
 end
 
 ---map lhs<motion> to right handside in operator pending mode
@@ -154,40 +156,48 @@ local function maybe_enable()
     local registers =
       '"0123456789-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:.%#=*+_/'
     for r in registers:gmatch '.' do
-      map('"' .. r .. 'p', function()
-        insert.insert_at(coord.get_coord '.', {
-          post_nav = 1,
-          callback = function()
-            async.quit_insert(function()
-              vim.api.nvim_put(
-                ---@diagnostic disable-next-line: param-type-mismatch
-                vim.fn.getreg(r, nil, true),
-                vim.fn.getregtype(r),
-                false,
-                false
-              )
-            end)
-          end,
-        })
-      end)
-      map('"' .. r .. 'P', function()
-        insert.insert_at(coord.get_coord '.', {
-          callback = function()
-            async.quit_insert(function()
-              vim.api.nvim_put(
-                ---@diagnostic disable-next-line: param-type-mismatch
-                vim.fn.getreg(r, nil, true),
-                vim.fn.getregtype(r),
-                false,
-                false
-              )
-            end)
-          end,
-        })
-      end)
+      for p in ('pP'):gmatch '.' do
+        -- normal mode
+        map('"' .. r .. p, function()
+          insert.insert_at(coord.get_coord '.', {
+            post_nav = p == 'p' and 1 or 0,
+            callback = function()
+              async.quit_insert(function()
+                async.put(r)
+              end)
+            end,
+          })
+        end)
+
+        -- virtual mode
+        map('"' .. r .. p, function()
+          local start = coord.get_coord 'v'
+          local end_ = coord.get_coord '.'
+          ---@diagnostic disable-next-line: param-type-mismatch
+          local content = vim.fn.getreg(r, nil, true)
+          local regtype = vim.fn.getregtype(r)
+          async.feedkeys('<Esc>', function()
+            delete.delete_range(start, end_, {
+              callback = function()
+                async.quit_insert(function()
+                  vim.api.nvim_put(
+                    ---@diagnostic disable-next-line: param-type-mismatch
+                    content,
+                    regtype,
+                    false,
+                    false
+                  )
+                end)
+              end,
+            })
+          end)
+        end, { mode = 'x' })
+      end
     end
     remap('p', '""p')
     remap('P', '""P')
+    remap('p', '""p', { mode = 'x' })
+    remap('P', '""P', { mode = 'x' })
   end
 end
 
