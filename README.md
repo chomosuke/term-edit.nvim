@@ -1,6 +1,10 @@
 # term-edit.nvim
 Allowing you to edit your command in the terminal just like any other buffer.
 
+
+https://user-images.githubusercontent.com/38484873/213377673-bed6a3c9-9bc8-4d96-bdf8-a5e5e77ce7dc.mp4
+
+
 No more smashing left and right arrow when you make a typo.\
 You can now smash `h` and `l` instead ;).
 
