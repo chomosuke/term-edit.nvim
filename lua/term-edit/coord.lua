@@ -14,15 +14,15 @@ local function find_line_start()
   local winwidth = get_winwidth()
   local line = vim.fn.getline(lnum) --[[@as string]]
   while true do
-    local _, start_col = string.find(line, config.opts.prompt_start)
+    local _, start_col = string.find(line, config.opts.prompt_end)
     if start_col then
-      -- found prompt_start
+      -- found prompt_end
       return { line = lnum, col = start_col + 1 }
     end
 
     lnum = lnum - 1
     if lnum < 1 then
-      vim.notify('Can not find prompt_start: ' .. config.opts.prompt_start)
+      vim.notify('Can not find prompt_end: ' .. config.opts.prompt_end)
       return { line = 1, col = 1 }
     end
 
