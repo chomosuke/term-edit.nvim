@@ -17,6 +17,23 @@ You can now smash `h` and `l` instead ;).
 - Paste: `p` `P` `"<register>p` `"<register>P`
 - Replace: `r` in normal mode
 
+## Installation
+**Lazy.nvim:**
+```lua
+{
+	'chomosuke/term-edit.nvim',
+	lazy = false, -- or ft = 'toggleterm' if you use toggleterm.nvim
+}
+```
+**Packer.nvim:**
+```lua
+use 'chomosuke/term-edit.nvim'
+```
+**vim-plug:**
+```vim
+Plug 'chomosuke/term-edit.nvim'
+```
+
 ## Limitations
 - This plugin assumes there are no \<Tab\> though it might tolerate it.
 - This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than necessary. This can happen when it is instructed to go somewhere it can't reach or delete something not a part of the command. This may make your terminal beep if you have audio bell enabled.
