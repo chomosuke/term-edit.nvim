@@ -9,6 +9,7 @@ No more smashing left and right arrow when you make a typo.\
 You can now smash `h` and `l` instead ;).
 
 ## Supported Actions
+- Enter insert as if this plugin doesn't exist: `<C-i>`
 - Enter insert: `i`, `a`, `A`, `I`.
 - Delete: `d<motion>`, `dd`, `D`, `x`.
 - Change: `c<motion>`, `cc`, `C`, `s`, `S`.
@@ -45,6 +46,57 @@ require 'term-edit'.setup {
     -- For most windows cmd user this is '>'
     prompt_end = '%$ ',
     -- How to write lua patterns: https://www.lua.org/pil/20.2.html
+}
+```
+
+## Configuration
+This plugin should work out of the box with default settings.
+```lua
+local default_opts = {
+    -- Setting this true will enable printing debug information with print()
+    debug = false,
+
+    -- Number of event loops it takes for <Left>, <Right> or <BS> keys to change
+    -- the cursor's position.
+    -- If term-edit.nvim is unreliable, increasing this value could help.
+    -- Decreasing this value can increase the responsiveness of term-edit.nvim
+    feedkeys_delay = 10,
+
+    -- To achine its functionality term-edit.nvim does things like:
+    -- `vim.keymap.set('n', 'i', function() --[[magic]] end)`
+    --
+    -- Let's say instead of 'i', you would want to press 'o' to insert at cursor.
+    -- You can either: `vim.keymap.set('n', 'o', 'i', { remap = true })`
+    --
+    -- Or: `mapping = { n --[[normal mode]] = { i = 'o' } }`
+    --   This would resulting in term-edit.nvim running:
+    --   `vim.keymap.set('n', 'o', function() --[[magic]] end)`
+    --   instead of `vim.keymap.set('n', 'i', function() --[[magic]] end)`.
+    --
+    -- Note: if lhs is one character, it'll replace all instance of that
+    --   characters in the same mode.
+    --   I.e. `mapping = { n = { c = 'o' } }` will also replace 'cc' with 'oo'.
+    --   To map 'c' to 'o' without mapping 'cc' to 'oo' do:
+    --   `mapping = { n = { c = 'o', cc = 'cc' } }`.
+    --
+    --   Further more, `mapping = { n = { c = false } }` will also disable 'cc'.
+    --   To disable 'c' without disabling 'cc' do:
+    --   `mapping = { n = { c = false, cc = 'cc' } }`
+    --
+    -- Setting new_lhs to false would disable the mapping.
+    -- I.e. `mapping = { n = { i = false } }` would prevent
+    --   `vim.keymap.set('n', 'i', function() --[[magic]] end)`
+    --   from running at all.
+    --
+    -- For more examples and explaination, see :h term-edit.mapping
+    mapping = {
+        -- mode = {
+        --     lhs = new_lhs
+        -- }
+    },
+
+    -- Used to detect the start of the command
+    -- prompt_end = no default, this is mandatory
 }
 ```
 
