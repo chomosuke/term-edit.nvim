@@ -18,4 +18,5 @@ You can now smash `h` and `l` instead ;).
 - Replace: `r` in normal mode
 
 ## Limitations
-term-edit.nvim assumes there are no \<Tab\> though it might tolerate it.
+- This plugin assumes there are no \<Tab\> though it might tolerate it.
+- This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than necessary. This can happen when it is instructed to go somewhere it can't reach or delete something not a part of the command. This may make your terminal beep if you have audio bell enabled.
