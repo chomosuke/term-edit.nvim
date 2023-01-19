@@ -62,33 +62,19 @@ local default_opts = {
     -- Decreasing this value can increase the responsiveness of term-edit.nvim
     feedkeys_delay = 10,
 
-    -- To achine its functionality term-edit.nvim does things like:
-    -- `vim.keymap.set('n', 'i', function() --[[magic]] end)`
+    -- Use case 1: I want to press 'o' instead of 'i' to enter insert.
+    --   `mapping = { n --[[normal mode]] = { i = 'o' } }`
+    --   `vim.keymap.set('n', 'o', 'i', { remap = true })` will achieve the same
+    --   thing. (won't work without remap = true)
+    -- Use case 2: I want to map 'c' to 'd' and 'd' to 'c'
+    --   (keymap with remap is no longer an option)
+    --   `mapping = { n = { c = 'd', d = 'c' } }` (will also map 'cc' to 'dd'
+    --   and 'dd' to 'cc')
+    -- Use case 3: I already mapped s to something else and do not want
+    --   term-edit.nvim to override my mapping.
+    --   `mapping = { n = { s = false } }`
     --
-    -- Let's say instead of 'i', you would want to press 'o' to insert at cursor.
-    -- You can either: `vim.keymap.set('n', 'o', 'i', { remap = true })`
-    --
-    -- Or: `mapping = { n --[[normal mode]] = { i = 'o' } }`
-    --   This would resulting in term-edit.nvim running:
-    --   `vim.keymap.set('n', 'o', function() --[[magic]] end)`
-    --   instead of `vim.keymap.set('n', 'i', function() --[[magic]] end)`.
-    --
-    -- Note: if lhs is one character, it'll replace all instance of that
-    --   characters in the same mode.
-    --   I.e. `mapping = { n = { c = 'o' } }` will also replace 'cc' with 'oo'.
-    --   To map 'c' to 'o' without mapping 'cc' to 'oo' do:
-    --   `mapping = { n = { c = 'o', cc = 'cc' } }`.
-    --
-    --   Further more, `mapping = { n = { c = false } }` will also disable 'cc'.
-    --   To disable 'c' without disabling 'cc' do:
-    --   `mapping = { n = { c = false, cc = 'cc' } }`
-    --
-    -- Setting new_lhs to false would disable the mapping.
-    -- I.e. `mapping = { n = { i = false } }` would prevent
-    --   `vim.keymap.set('n', 'i', function() --[[magic]] end)`
-    --   from running at all.
-    --
-    -- For more examples and explaination, see :h term-edit.mapping
+    -- For more examples and detailed explaination, see :h term-edit.mapping
     mapping = {
         -- mode = {
         --     lhs = new_lhs
