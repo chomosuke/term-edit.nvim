@@ -8,9 +8,6 @@ https://user-images.githubusercontent.com/38484873/213377673-bed6a3c9-9bc8-4d96-
 No more smashing left and right arrow when you make a typo.\
 You can now smash `h` and `l` instead ;).
 
-## WIP
-This is a work in progress. It might or might not work expected.
-
 ## Supported Actions
 - Enter insert: `i`, `a`, `A`, `I`.
 - Delete: `d<motion>`, `dd`, `D`, `x`.
