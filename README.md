@@ -34,6 +34,20 @@ use 'chomosuke/term-edit.nvim'
 Plug 'chomosuke/term-edit.nvim'
 ```
 
+## Setup
+```lua
+-- calling require 'term-edit'.setup(opts) is mandatory
+require 'term-edit'.setup {
+	-- mandatory option:
+	-- set this to a lua pattern that would match the end of your prompt
+	-- For most bash/zsh user this is '%$ '
+	-- For most powershell/fish user this is '> '
+	-- For most windows cmd user this is '>'
+	prompt_start = '%$ ',
+	-- how to write lua patterns: https://www.lua.org/pil/20.2.html
+}
+```
+
 ## Limitations
 - This plugin assumes there are no \<Tab\> though it might tolerate it.
 - This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than necessary. This can happen when it is instructed to go somewhere it can't reach or delete something not a part of the command. This may make your terminal beep if you have audio bell enabled.
