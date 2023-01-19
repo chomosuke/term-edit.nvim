@@ -3,6 +3,7 @@ local M = {
   opts = {
     debug = false,
     feedkeys_delay = 10,
+    mapping = {},
   },
 }
 
@@ -10,6 +11,7 @@ local M = {
 ---@field prompt_start string
 ---@field debug boolean
 ---@field feedkeys_delay integer
+---@field mapping { [string]: { [string]: string|false } }
 
 ---set options for term-edit
 ---@param opts TermEditOpts
