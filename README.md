@@ -24,15 +24,16 @@ You can now smash `h` and `l` instead ;).
 {
     'chomosuke/term-edit.nvim',
     lazy = false, -- or ft = 'toggleterm' if you use toggleterm.nvim
+    version = '1.*',
 }
 ```
 **Packer.nvim:**
 ```lua
-use 'chomosuke/term-edit.nvim'
+use { 'chomosuke/term-edit.nvim', tag = 'v1.*' }
 ```
 **vim-plug:**
 ```vim
-Plug 'chomosuke/term-edit.nvim'
+Plug 'chomosuke/term-edit.nvim', {'tag': 'v1.*'}
 ```
 
 ## Setup
