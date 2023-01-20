@@ -1,0 +1,182 @@
+*term-edit.nvim.txt* Allowing vi keymapping to work in terminal buffers
+
+Author: Richard Li <a13323600@gmail.com>
+
+==============================================================================
+CONTENTS                                         *term-edit*
+
+  1. Supported Actions                        |term-edit-supported-actions|
+  2. Setup                                    |term-edit-setup|
+  3. Configuration                            |term-edit-configuration|
+  4. Limitations                              |term-edit-limitation|
+
+==============================================================================
+ 1. SUPPORTED ACTIONS                            *term-edit-supported-actions*
+
+Normal mode: ~
+`<C-i>`: Enter insert as if this plugin doesn't exist.
+`i`: Insert at cursor.
+`a`: Insert after cursor.
+`I`: Insert at the start of the current line.
+`A`: Insert at the end of the current line.
+`d<motion>`: Delete what `<motion>` includes.
+`dd`: Delete current line.
+`D`: Delete cursor til the end of line.
+`x`: Delete character under cursor.
+`c<motion>`: Delete what `<motion>` includes and enter insert mode.
+`cc`: Delete current line and enter insert mode.
+`C`: Delete cursor til the end of line and enter insert mode.
+`s`: Delete character under cursor and enter insert mode.
+`S`: Delete current line and enter insert mode.
+`p`: Paste after current cursor.
+`P`: Paste before current cursor.
+`"<register>p`: Paste the content of `<register>` after current cursor.
+`"<register>P`: Paste the content of `<register>` before current cursor.
+`r<char>`: Replace character under cursor with `<char>`
+
+Visual mode: ~
+`d`: Delete selection.
+`c`: Delete selection and enter insert mode.
+`p`: Delete selection and paste.
+`P`: Delete selection and paste.
+`"<register>p`: Delete selection and paste the content of `<register>.
+`"<register>P`: Delete selection and paste the content of `<register>.
+
+All deleted text will be put into `"` register just like any other buffer
+
+==============================================================================
+ 2. SETUP                                        *term-edit-setup*
+
+For |term-edit.nvim| to work, you have to call `setup()` in your init.lua with
+`prompt_end`.
+>lua
+  -- Calling require 'term-edit'.setup(opts) is mandatory
+  require 'term-edit'.setup {
+    -- Mandatory option:
+    -- Set this to a lua pattern that would match the end of your prompt
+    -- For most bash/zsh user this is '%$ '
+    -- For most powershell/fish user this is '> '
+    -- For most windows cmd user this is '>'
+    prompt_end = '%$ ',
+    -- How to write lua patterns: https://www.lua.org/pil/20.2.html
+  }
+<
+==============================================================================
+ 3. CONFIGURATION                                *term-edit-configuration*
+
+The `setup()` function take one mandatory argument: configuration table. Apart
+from `prompt_end`, all configuration are optional and will be set to the
+default configuration of omitted.
+
+Default configuration: ~
+>lua
+  require 'term-edit'.setup {
+    -- prompt_end = '', no default, this is mandatory
+    debug = false,
+    feedkeys_delay = 10,
+    mapping = {},
+  }
+<
+Here's a list of configurations available in the `setup()` call
+
+*term-edit.prompt_end*
+A lua pattern that would match the end of your prompt
+For most bash/zsh user this is '%$ '
+For most powershell/fish user this is '> '
+For most windows cmd user this is '>'
+How to write lua patterns: https://www.lua.org/pil/20.2.html
+  Type: `string`, Default: N/A
+
+*term-edit.debug*
+Set this to true to enable debug print. Use `:mes` to view printed messages.
+  Type: `boolean`, Default: `false`
+
+*term-edit.feedkeys_delay*
+To achieve its functionality, |term-edit.nvim| needs to measure the location
+of the cursor and then run `feedkeys('<Left>', '<Right>' or '<BS>')` to
+malipulate the cursor. After it runs `feedkeys()` it has to wait a few event
+loops for the shell to process its input before measuring the cursor again.
+|feedkeys_delay| is the number of event loops that it waits before measuring
+the cursor again.
+If |term-edit.nvim| is unreliable, increasing this value might help.
+Decreasing this value can make |term-edit.nvim| more responsive.
+The default value of `10` is conservative. On linux/bash `feedkeys_delay = 2`
+works fine.
+  Type: `integer`, Default: `10`
+
+*term-edit.mapping*
+This configuration folow the format:
+>lua
+  mapping = {
+    n --[[normal mode]] = {
+      i --[[lhs]] = 'o', --[[new_lhs]]
+    },
+    x --[[visual mode]] = {
+      d --[[lhs]] = 'x', --[[new_lhs]]
+    }
+  }
+<
+To achine its functionality |term-edit.nvim| does things like:
+>lua
+  vim.keymap.set(
+    'n' --[[mode]],
+    '"+p' --[[lhs]],
+    function() --[[paste from + register]] end
+  )
+<
+However, sometimes user would like to replace `lhs` with something else. To
+  achieve this, |term-edit.nvim| checks the |mapping| configuration first.
+It first looks for a complete match of lhs, so for the above example, it would
+  check `mapping['n']['"+p']`.
+  If `mapping['n']['"+p'] == 'o'` it runs
+    `vim.keymap.set('n', 'o', function() end)` instead.
+  If `mapping['n']['"+p'] == false` it does not run `vim.keymap.set` at all.
+  If `mapping['n']['"+p'] == nil` it running the above code but not before
+    checking each indivisual character.
+    Say if `mapping['n']['p'] == 'o'` it would run
+      `vim.keymap.set('n', '"+o', function() end)` instead.
+    Say if `mapping['n']['p'] == false` it wouldn't run
+      `vim.keymap.set('n', '"+p', function() end)` either. Nor would it run
+      any other keymap with lhs containing `p`
+    If `mapping['n']['p'] == nil and mapping['n']['p'] == nil`
+      `and mapping['n']['p'] == nil` then it would run
+      `vim.keymap.set('n', '"+p', function() end)`
+
+Some examples:
+- `vim.keymap.set('n', 'o', 'i', { remap = true })`
+  In normal mode, press `o` to insert at cursor, this only works if
+  `remap = true`.
+
+- `mapping = { n = { i = 'o' } }`
+  In normal mode, press `o` to insert at cursor.
+
+- `mapping = { n = { c = 'o' } }`
+  In normal mode, press `o<motion>` to change `<motion>`, `oo` to change line.
+
+- `mapping = { n = { c = 'o', cc = 'cc' }}`
+  In normal mode, press `o<motion>` to change `<motion>`, `cc` to change line.
+
+- `mapping = { x = { c = 'd', d = 'c' }}`
+  In visual mode, press `c<motion>` to delete `<motion>`, `cc` to delete line,
+  `d<motion>` to change `<motion>`, `dd` to change line.
+
+- `mapping = { n = { c = false } }`
+  |term-edit.nvim| does not map `c<motion>` or `cc` in normal mode
+
+- `mapping = { n = { c = false, cc = 'cc' } }`
+  |term-edit.nvim| does not map `c<motion>` in normal mode, `cc` to change
+  line.
+
+  Type: `{ [string]: { [string]: string|false } }`, Default: `{}`
+
+==============================================================================
+ 4. LIMITATIONS                                  *term-edit-limitation*
+
+This plugin assumes there are no \<Tab\> though it might tolerate it.
+
+This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than
+necessary. This can happen when it is instructed to go somewhere it can't
+reach or delete something not a part of the command. This may make your
+terminal beep if you have audio bell enabled.
+
+vim:tw=78:ts=2:sw=2:et:ft=help:norl:
