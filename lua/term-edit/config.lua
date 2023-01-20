@@ -8,7 +8,7 @@ local M = {
 }
 
 ---@class TermEditOpts
----@field prompt_start string
+---@field prompt_end string
 ---@field debug boolean
 ---@field feedkeys_delay integer
 ---@field mapping { [string]: { [string]: string|false } }
@@ -16,12 +16,12 @@ local M = {
 ---set options for term-edit
 ---@param opts TermEditOpts
 function M.setup(opts)
-  if not opts or not opts.prompt_start then
+  if not opts or not opts.prompt_end then
     vim.notify(
-      [[prompt_start is a mandatory argument to setup!
+      [[prompt_end is a mandatory argument to setup!
 Please provide it with a lua pattern that would match the end of the shell prompt.
 Say if your shell prompt is `user@Host ~ $ ` then do:
-`require('term-edit').setup { prompt_start = ' %$ ' }`]],
+`require('term-edit').setup { prompt_end = ' %$ ' }`]],
       vim.log.levels.WARN
     )
   end
