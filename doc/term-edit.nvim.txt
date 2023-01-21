@@ -36,6 +36,7 @@ Normal mode: ~
 
 Visual mode: ~
 `d`: Delete selection.
+`x`: Delete selection.
 `c`: Delete selection and enter insert mode.
 `p`: Delete selection and paste.
 `P`: Delete selection and paste.

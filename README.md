@@ -12,7 +12,7 @@ You can now smash `h` and `l` instead ;).
 - Delete: `d<motion>`, `dd`, `D`, `x`.
 - Change: `c<motion>`, `cc`, `C`, `s`, `S`.
 - Visual change: `c` in visual mode.
-- Visual delete: `d` in visual mode.
+- Visual delete: `d`, `x` in visual mode.
 - Paste: `p` `P` `"<register>p` `"<register>P`
 - Replace: `r` in normal mode
 
