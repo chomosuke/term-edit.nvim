@@ -8,7 +8,7 @@ local M = {
 }
 
 ---@class TermEditOpts
----@field prompt_end string
+---@field prompt_end string|string[]
 ---@field debug boolean
 ---@field feedkeys_delay integer
 ---@field mapping { [string]: { [string]: string|false } }

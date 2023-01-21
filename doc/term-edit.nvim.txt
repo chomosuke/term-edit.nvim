@@ -81,12 +81,18 @@ Default configuration: ~
 Here's a list of configurations available in the `setup()` call
 
 *term-edit.prompt_end*
-A lua pattern that would match the end of your prompt
-For most bash/zsh user this is '%$ '
-For most powershell/fish user this is '> '
-For most windows cmd user this is '>'
+A lua pattern that would match the end of your prompt.
+For most bash/zsh user this is `'%$ '`.
+For most powershell/fish user this is `'> '`.
+For most windows cmd user this is `'>'`.
+
+Or a table of lua patterns where at least one matches the end of your prompt.
+Say if you're a fish user but sometimes you ssh into a bash environment,
+providing `prompt_end = { '%$', '> ' }` would match the end of the prompt
+correctly in both situation.
+
 How to write lua patterns: https://www.lua.org/pil/20.2.html
-  Type: `string`, Default: N/A
+  Type: `string|string[]`, Default: N/A
 
 *term-edit.debug*
 Set this to true to enable debug print. Use `:mes` to view printed messages.
