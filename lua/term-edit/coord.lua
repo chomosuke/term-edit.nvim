@@ -14,7 +14,19 @@ local function find_line_start()
   local winwidth = get_winwidth()
   local line = vim.fn.getline(lnum) --[[@as string]]
   while true do
-    local _, start_col = string.find(line, config.opts.prompt_end)
+    local start_col = nil
+    if type(config.opts.prompt_end) == 'string' then
+      _, start_col = string.find(line, config.opts.prompt_end --[[@as string]])
+    else
+      for _, prompt_end in
+        pairs(config.opts.prompt_end --[[@as string[] ]])
+      do
+        _, start_col = string.find(line, prompt_end)
+        if start_col ~= nil then
+          break
+        end
+      end
+    end
     if start_col then
       -- found prompt_end
       return { line = lnum, col = start_col + 1 }
