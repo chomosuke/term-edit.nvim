@@ -42,6 +42,7 @@ function M.enable()
     })
   end)
   m.remap('x', 'dl')
+  m.remap('x', 'd', { mode = 'x' })
 end
 
 return M
