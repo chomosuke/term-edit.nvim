@@ -51,12 +51,13 @@ end
 ---Assume start in terminal mode, will execute callback in terminal mode
 ---@param keys string
 ---@param callback function? called after the keys are fed
----@param opts? { moves?: boolean }
+---@param opts? { moves?: boolean, start_normal: boolean, callback_normal: boolean }
 function M.feedkeys(keys, callback, opts)
+  opts = opts or {}
   if callback then
     local old
     register_callback(callback, function()
-      if not opts then
+      if not opts.moves then
         return false
       end
 
@@ -65,14 +66,16 @@ function M.feedkeys(keys, callback, opts)
       old = current
 
       -- wait till it doesn't move if the keys moves
-      return opts.moves and moved
+      return moved
     end)
-    keys = keys
-      .. '<C-\\><C-n>' -- exit terminal mode
-      .. '<cmd>' -- enter command mode
-      .. 'startinsert | ' -- get back to terminal mode
-      .. call_callback()
-      .. '<CR>'
+    if not opts.start_normal then
+      keys = keys .. '<C-\\><C-n>' -- exit terminal mode
+    end
+    keys = keys .. '<cmd>' -- enter command mode
+    if not opts.callback_normal then
+      keys = keys .. 'startinsert | ' -- get back to terminal mode
+    end
+    keys = keys .. call_callback() .. '<CR>'
   end
   vim.api.nvim_input(keys)
 end

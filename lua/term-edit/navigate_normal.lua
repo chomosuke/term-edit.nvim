@@ -4,7 +4,7 @@ local M = {}
 
 ---navigate in normal mode
 ---@param target Coord
-function M.navigate(target)
+function M.navigate_to(target)
   local current = coord.get_coord '.'
   local keys = nil
   if current.line < target.line then
@@ -18,8 +18,8 @@ function M.navigate(target)
   end
   if keys then
     async.feedkeys(keys, function()
-      M.navigate(target)
-    end, { moves = true })
+      M.navigate_to(target)
+    end, { moves = true, start_normal = true, callback_normal = true })
   end
 end
 
