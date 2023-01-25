@@ -17,22 +17,11 @@ function M.move_keys(len)
 end
 
 ---Enter insert mode and place cursor at target
----@param opts? { callback?: function, post_nav?: integer }
-function M.insert_at(target, opts)
-  opts = opts or {}
+---@param callback? function
+function M.insert_at(target, callback)
   utils.debug_print('enter_insert: target: ', utils.inspect(target))
   async.vim_cmd('startinsert', function()
-    navigate.navigate_with(target, M.move_keys, function()
-      if opts.post_nav then
-        async.feedkeys(
-          M.move_keys(opts.post_nav),
-          opts.callback,
-          { moves = true }
-        )
-      elseif opts.callback then
-        opts.callback()
-      end
-    end)
+    navigate.navigate_with(target, M.move_keys, callback)
   end)
 end
 

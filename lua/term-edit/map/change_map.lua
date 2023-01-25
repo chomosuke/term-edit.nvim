@@ -22,11 +22,7 @@ function M.enable()
   m.remap('cw', 'ce')
   m.remap('cW', 'cE')
   m.map('C', function()
-    delete.delete_range(coord.get_coord '.', coord.get_coord '$', {
-      callback = function()
-        async.quit_insert()
-      end,
-    })
+    delete.delete_range(coord.get_coord '.', coord.get_coord '$')
   end)
   m.remap('s', 'cl')
   m.remap('S', 'cc')

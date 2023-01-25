@@ -9,15 +9,12 @@ function M.enable()
     local cursor = coord.get_coord '.'
     local replacement = vim.fn.nr2char(vim.fn.getchar())
     async.schedule(function()
-      insert.insert_at(cursor, {
-        callback = function()
-          if replacement == '<' then
-            replacement = '<lt>'
-          end
-          async.feedkeys('<BS>' .. replacement, async.quit_insert)
-        end,
-        post_nav = 1,
-      })
+      insert.insert_at(coord.add(cursor, { col = 1 }), function()
+        if replacement == '<' then
+          replacement = '<lt>'
+        end
+        async.feedkeys('<BS>' .. replacement, async.quit_insert)
+      end)
     end)
   end)
 end

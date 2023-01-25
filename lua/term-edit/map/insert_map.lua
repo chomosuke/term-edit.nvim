@@ -13,9 +13,7 @@ function M.enable()
     insert.insert_at(coord.get_coord '.')
   end)
   m.map('a', function()
-    insert.insert_at(coord.get_coord '.', {
-      post_nav = 1,
-    })
+    insert.insert_at(coord.add(coord.get_coord '.', { col = 1 }))
   end)
   m.map('A', function()
     insert.insert_at(coord.get_coord '$+')
