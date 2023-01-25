@@ -2,7 +2,6 @@ local utils = require 'term-edit.utils'
 local coord = require 'term-edit.coord'
 local insert = require 'term-edit.insert'
 local navigate = require 'term-edit.navigate'
-local async = require 'term-edit.async'
 local M = {}
 
 local function delete_keys(len)
@@ -15,9 +14,8 @@ end
 ---Start in normal mode, end in insert mode
 ---@param start Coord
 ---@param end_ Coord
----@param opts? { callback?: function, post_nav?: integer }
-function M.delete_range(start, end_, opts)
-  opts = opts or {}
+---@param callback? function
+function M.delete_range(start, end_, callback)
   utils.debug_print(
     'delete_range: start:',
     utils.inspect(start),
@@ -34,34 +32,18 @@ function M.delete_range(start, end_, opts)
     start = temp
   end
 
-  local function post()
-    if opts.post_nav then
-      async.feedkeys(
-        insert.move_keys(opts.post_nav),
-        opts.callback,
-        { moves = true }
-      )
-    elseif opts.callback then
-      opts.callback()
-    end
-  end
-
   local function delete()
     local cursor = coord.get_coord '.'
     if -- nothing to delete if current cursor isn't after start
-      cursor.line > start.line
-      or (cursor.line == start.line and cursor.col > start.col)
+      coord.before(start, cursor)
     then
-      navigate.navigate_with(start, delete_keys, post)
-    else
-      post()
+      navigate.navigate_with(start, delete_keys, callback)
+    elseif callback then
+      callback()
     end
   end
 
-  insert.insert_at(end_, {
-    callback = delete,
-    post_nav = 1,
-  })
+  insert.insert_at(coord.add(end_, { col = 1 }), delete)
 end
 
 return M

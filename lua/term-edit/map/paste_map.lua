@@ -13,9 +13,9 @@ function M.enable()
     for p in ('pP'):gmatch '.' do
       -- normal mode
       m.map('"' .. r .. p, function()
-        insert.insert_at(coord.get_coord '.', {
-          post_nav = p == 'p' and 1 or 0,
-          callback = function()
+        insert.insert_at(
+          coord.add(coord.get_coord '.', { col = p == 'p' and 1 or 0 }),
+          function()
             async.quit_insert(function()
               async.put(r)
               async.schedule(function()
@@ -24,8 +24,8 @@ function M.enable()
                 end)
               end, 5)
             end)
-          end,
-        })
+          end
+        )
       end)
 
       -- virtual mode
@@ -36,24 +36,22 @@ function M.enable()
         local content = vim.fn.getreg(r, nil, true)
         local regtype = vim.fn.getregtype(r)
         async.feedkeys('<Esc>', function()
-          delete.delete_range(start, end_, {
-            callback = function()
-              async.quit_insert(function()
-                vim.api.nvim_put(
-                  ---@diagnostic disable-next-line: param-type-mismatch
-                  content,
-                  regtype,
-                  false,
-                  false
-                )
-                async.schedule(function()
-                  async.vim_cmd('startinsert', function()
-                    async.schedule(async.quit_insert, 5)
-                  end)
-                end, 5)
-              end)
-            end,
-          })
+          delete.delete_range(start, end_, function()
+            async.quit_insert(function()
+              vim.api.nvim_put(
+                ---@diagnostic disable-next-line: param-type-mismatch
+                content,
+                regtype,
+                false,
+                false
+              )
+              async.schedule(function()
+                async.vim_cmd('startinsert', function()
+                  async.schedule(async.quit_insert, 5)
+                end)
+              end, 5)
+            end)
+          end)
         end)
       end, { mode = 'x' })
     end
