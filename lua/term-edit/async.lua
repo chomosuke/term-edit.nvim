@@ -26,7 +26,7 @@ local function register_callback(callback, defer_more)
     local start_time = os.clock()
     local event_loop_elapsed = 0
     local function schedule_callback()
-      if os.clock() > start_time + 1 then
+      if os.clock() > start_time + 10 then
         vim.notify(
           'feedkeys callbacks leak' .. vim.inspect(M.callbacks),
           vim.log.levels.ERROR
