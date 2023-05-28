@@ -60,6 +60,9 @@ function M.enable()
   m.remap('P', '""P')
   m.remap('p', '""p', { mode = 'x' })
   m.remap('P', '""P', { mode = 'x' })
+
+  vim.keymap.set({'n', 'x'}, '<C-p>', 'p', { buffer = true })
+  vim.keymap.set({'n', 'x'}, '<C-P>', 'P', { buffer = true })
 end
 
 return M
