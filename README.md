@@ -7,7 +7,6 @@ No more smashing left and right arrow when you make a typo.\
 You can now smash `h` and `l` instead ;).
 
 ## 💪 Supported Actions
-- Enter insert as if this plugin doesn't exist: `<C-i>`
 - Enter insert: `i`, `a`, `A`, `I`.
 - Delete: `d<motion>`, `dd`, `D`, `x`.
 - Change: `c<motion>`, `cc`, `C`, `s`, `S`.
@@ -15,6 +14,8 @@ You can now smash `h` and `l` instead ;).
 - Visual delete: `d`, `x` in visual mode.
 - Paste: `p` `P` `"<register>p` `"<register>P`
 - Replace: `r` in normal mode
+- Enter insert as if this plugin doesn't exist: `<C-i>`
+- Paste as if this plugin doesn't exist: `<C-p>` & `<C-P>`
 
 ## 📦 Installation
 **Lazy.nvim:**

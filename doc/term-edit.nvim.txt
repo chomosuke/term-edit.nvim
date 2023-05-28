@@ -28,6 +28,8 @@ Normal mode: ~
 `C`: Delete cursor til the end of line and enter insert mode.
 `s`: Delete character under cursor and enter insert mode.
 `S`: Delete current line and enter insert mode.
+`<C-p>`: Paste as if this plugin doesn't exist.
+`<C-P>`: Paste as if this plugin doesn't exist.
 `p`: Paste after current cursor.
 `P`: Paste before current cursor.
 `"<register>p`: Paste the content of `<register>` after current cursor.
