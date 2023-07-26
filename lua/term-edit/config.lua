@@ -4,6 +4,9 @@ local M = {
     debug = false,
     feedkeys_delay = 10,
     mapping = {},
+    use_up_down_arrows = function()
+      return false
+    end,
   },
 }
 
@@ -12,6 +15,7 @@ local M = {
 ---@field debug boolean
 ---@field feedkeys_delay integer
 ---@field mapping { [string]: { [string]: string|false } }
+---@field use_up_down_arrows function
 
 ---set options for term-edit
 ---@param opts TermEditOpts
