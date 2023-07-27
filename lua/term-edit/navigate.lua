@@ -92,6 +92,11 @@ function M.navigate_all_arrows(target, callback)
   local function n(old)
     local current = coord.get_coord '.'
     if coord.equals(current, old) or coord.equals(current, target) then
+      if coord.equals(current, old) then
+        utils.debug_print('Did not move')
+      else
+        utils.debug_print('Target reached')
+      end
       if callback then
         callback()
       end
@@ -108,6 +113,7 @@ function M.navigate_all_arrows(target, callback)
     elseif current.col > target.col then
       keys = keys .. string.rep('<Left>', current.col - target.col)
     end
+    utils.debug_print('All arrow navigation: ', keys)
     async.feedkeys(keys, function()
       n(current)
     end, { moves = true })
