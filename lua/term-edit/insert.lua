@@ -16,7 +16,7 @@ local function move_keys(len, _)
 end
 
 local function move_keys_up_down(len, lines)
-  utils.debug_print 'using up down arrow to move'
+  utils.debug_print('using up down arrow to move line: ', lines)
   if lines > 0 then
     return string.rep('<Down>', lines)
   elseif lines < 0 then
