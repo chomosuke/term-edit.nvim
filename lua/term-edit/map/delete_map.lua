@@ -2,13 +2,13 @@ local m = require 'term-edit.map.m'
 local coord = require 'term-edit.coord'
 local async = require 'term-edit.async'
 local delete = require 'term-edit.delete'
-local navigate_normal = require 'term-edit.navigate_normal'
+local navigate = require 'term-edit.navigate'
 
 local M = {}
 
 local function adjust_cursor(start)
   return function()
-    navigate_normal.navigate_to(start)
+    navigate.navigate_normal(start)
   end
 end
 

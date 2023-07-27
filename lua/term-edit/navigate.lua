@@ -5,9 +5,8 @@ local M = {}
 
 ---navigate with move_fn until target is reached
 ---@param target Coord
----@param move_keys function (len, lines)
+---@param move_keys function len
 ---len is the number of col to move right, negative means move left,
----lines is the number of line to move down, negative means up.
 ---@param callback? function this function will be called after target is reached
 function M.navigate_with(target, move_keys, callback)
   local function navigate_col()
@@ -16,9 +15,11 @@ function M.navigate_with(target, move_keys, callback)
     -- If not the same line means move_line reached end of command
     -- Don't move column anymore
     if current.line == target.line then
-      async.feedkeys(move_keys(target.col - current.col, 0), callback, {
-        moves = true,
-      })
+      async.feedkeys(
+        move_keys(target.col - current.col),
+        callback,
+        { moves = true }
+      )
     elseif callback then
       callback()
     end
@@ -29,15 +30,14 @@ function M.navigate_with(target, move_keys, callback)
     local current = coord.get_coord '.'
     utils.debug_print('move_line: ', utils.inspect(current))
     if
-      current.line == target.line -- reached destination
-      or coord.equals(current, old) -- didn't move in last call
+        current.line == target.line -- reached destination
+        or coord.equals(current, old) -- didn't move in last call
     then
       navigate_col()
       return
     end
     local col_end = vim.fn.col '$'
     local move_len
-    local move_line
     if current.line < target.line then
       -- move to end + one right to move to line below
       move_len = col_end - current.col
@@ -45,23 +45,77 @@ function M.navigate_with(target, move_keys, callback)
         -- encountered <CR>, need to move one more to get to the next line
         move_len = 1
       end
-
-      move_line = 1
     else
       -- move to start + one left to move to line above
       move_len = -current.col
-
-      move_line = -1
     end
     old = current
-    async.feedkeys(move_keys(move_len, move_line), function()
+    async.feedkeys(move_keys(move_len), function()
       navigate_line(old)
-    end, {
-      moves = true,
-    })
+    end, { moves = true })
   end
 
   navigate_line()
+end
+
+---navigate in normal mode
+---@param target Coord
+function M.navigate_normal(target)
+  local function n(old)
+    local current = coord.get_coord '.'
+    if coord.equals(current, old) then
+      return
+    end
+    local keys = nil
+    if current.line < target.line then
+      keys = string.rep('j', target.line - current.line)
+    elseif current.line > target.line then
+      keys = string.rep('k', current.line - target.line)
+    elseif current.col < target.col then
+      keys = string.rep('l', target.col - current.col)
+    elseif current.col > target.col then
+      keys = string.rep('h', current.col - target.col)
+    end
+    if keys then
+      async.feedkeys(keys, function()
+        n(current)
+      end, { moves = true, start_normal = true, callback_normal = true })
+    end
+  end
+  n()
+end
+
+---navigate with all arrow keys
+---@param target Coord
+---@param callback? function this function will be called after target is reached
+function M.navigate_all_arrows(target, callback)
+  local function n(old)
+    local current = coord.get_coord '.'
+    if coord.equals(current, old) then
+      if callback then
+        callback()
+      end
+      return
+    end
+    local keys = nil
+    if current.line < target.line then
+      keys = string.rep('<Down>', target.line - current.line)
+    elseif current.line > target.line then
+      keys = string.rep('<Up>', current.line - target.line)
+    elseif current.col < target.col then
+      keys = string.rep('<Right>', target.col - current.col)
+    elseif current.col > target.col then
+      keys = string.rep('<Left>', current.col - target.col)
+    end
+    if keys then
+      async.feedkeys(keys, function()
+        n(current)
+      end, { moves = true })
+    elseif callback then
+      callback()
+    end
+  end
+  n()
 end
 
 return M

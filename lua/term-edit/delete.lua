@@ -4,7 +4,7 @@ local insert = require 'term-edit.insert'
 local navigate = require 'term-edit.navigate'
 local M = {}
 
-local function delete_keys(len, _)
+local function delete_keys(len)
   assert(len <= 0, len)
   utils.debug_print('delete_by:', len)
   return string.rep('<BS>', -len)
