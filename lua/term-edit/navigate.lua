@@ -30,8 +30,8 @@ function M.navigate_with(target, move_keys, callback)
     local current = coord.get_coord '.'
     utils.debug_print('move_line: ', utils.inspect(current))
     if
-        current.line == target.line -- reached destination
-        or coord.equals(current, old) -- didn't move in last call
+      current.line == target.line -- reached destination
+      or coord.equals(current, old) -- didn't move in last call
     then
       navigate_col()
       return
@@ -91,29 +91,26 @@ end
 function M.navigate_all_arrows(target, callback)
   local function n(old)
     local current = coord.get_coord '.'
-    if coord.equals(current, old) then
+    if coord.equals(current, old) or coord.equals(current, target) then
       if callback then
         callback()
       end
       return
     end
-    local keys = nil
+    local keys = ''
     if current.line < target.line then
-      keys = string.rep('<Down>', target.line - current.line)
+      keys = keys .. string.rep('<Down>', target.line - current.line)
     elseif current.line > target.line then
-      keys = string.rep('<Up>', current.line - target.line)
-    elseif current.col < target.col then
-      keys = string.rep('<Right>', target.col - current.col)
+      keys = keys .. string.rep('<Up>', current.line - target.line)
+    end
+    if current.col < target.col then
+      keys = keys .. string.rep('<Right>', target.col - current.col)
     elseif current.col > target.col then
-      keys = string.rep('<Left>', current.col - target.col)
+      keys = keys .. string.rep('<Left>', current.col - target.col)
     end
-    if keys then
-      async.feedkeys(keys, function()
-        n(current)
-      end, { moves = true })
-    elseif callback then
-      callback()
-    end
+    async.feedkeys(keys, function()
+      n(current)
+    end, { moves = true })
   end
   n()
 end
