@@ -111,7 +111,7 @@ function M.navigate_all_arrows(target, callback)
     if current.col < target.col then
       keys = keys .. string.rep('<Right>', target.col - current.col)
     elseif current.col > target.col then
-      keys = keys .. string.rep('<Left>', current.col - target.col)
+      keys = string.rep('<Left>', current.col - target.col) .. keys
     end
     utils.debug_print('All arrow navigation: ', keys)
     async.feedkeys(keys, function()
