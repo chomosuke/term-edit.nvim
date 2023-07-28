@@ -83,6 +83,25 @@ local default_opts = {
         -- }
     },
 
+    -- If this function returns true, term-edit.nvim will use up and down arrow
+    -- to move the cursor as well as left and right arrow.
+    -- It will be called before terminal mode is entered and the cursor is moved.
+    use_up_down_arrows = function()
+        return false
+        -- -- In certain environment, left and right arrows can not move the
+        -- -- cursor to the previous or next line, but up and down arrows can,
+        -- -- one example is ipython.
+        -- -- Below is an example that works for ipython
+        --
+        -- -- get content for line under cursor
+        -- local line = vim.fn.getline(vim.fn.line '.')
+        -- if line:find(']:', 1, true) or line:find('...:', 1, true) then
+        --   return true
+        -- else
+        --   return false
+        -- end
+    end,
+
     -- Used to detect the start of the command
     -- prompt_end = no default, this is mandatory
 }
@@ -93,7 +112,7 @@ local default_opts = {
 - This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than necessary. This can happen when it is instructed to go somewhere it can't reach or delete something not a part of the command. This may make your terminal beep if you have audio bell enabled.
 - The above limitation is worse in powershell and zsh, as for them, \<Right\> is set as confirm completion. As a result, if the cursor is somewhere after the end of the command, completion will be triggered.
 - Issue #29: Sometimes there appears to be dangling spaces after the end of the command, this is an upstream bug/limitation.
-- Some shells react especially slowly, e.g. powershell. Increase feedkeys_delay to 1000 before opening an issue.
+- Some shells react especially slowly, e.g. powershell. Increase feedkeys_delay to 20000 before opening an issue.
 
 ## 💻 Contribution
 All PRs are welcome.

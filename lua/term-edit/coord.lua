@@ -16,12 +16,12 @@ local function find_line_start()
   while true do
     local start_col = nil
     if type(config.opts.prompt_end) == 'string' then
-      _, start_col = string.find(line, config.opts.prompt_end --[[@as string]])
+      _, start_col = line:find(config.opts.prompt_end --[[@as string]])
     else
       for _, prompt_end in
         pairs(config.opts.prompt_end --[[@as string[] ]])
       do
-        _, start_col = string.find(line, prompt_end)
+        _, start_col = line:find(prompt_end)
         if start_col ~= nil then
           break
         end

@@ -178,6 +178,27 @@ Some examples:
 
   Type: `{ [string]: { [string]: string|false } }`, Default: `{}`
 
+*term-edit.use_up_down_arrows*
+If this function returns true, term-edit.nvim will use up and down arrow to
+move the cursor as well as left and right arrow.
+It will be called before terminal mode is entered and the cursor is moved.
+This is useful with certain environment where left and right arrows can not
+move the cursor to the previous or next line, but up and down arrows can, one
+example is `ipython`.
+Below is an example value of this option that works with `ipython`.
+>lua
+  use_up_down_arrows = function()
+    -- get content for line under cursor
+    local line = vim.fn.getline(vim.fn.line '.')
+    if line:find(']:', 1, true) or line:find('...:', 1, true) then
+      return true
+    else
+      return false
+    end
+  end
+<
+  Type: `function() -> boolean`, Default: `function() return false end`
+
 ==============================================================================
  4. LIMITATIONS                                  *term-edit-limitation*
 
