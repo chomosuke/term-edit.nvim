@@ -93,7 +93,7 @@ local default_opts = {
 - This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than necessary. This can happen when it is instructed to go somewhere it can't reach or delete something not a part of the command. This may make your terminal beep if you have audio bell enabled.
 - The above limitation is worse in powershell and zsh, as for them, \<Right\> is set as confirm completion. As a result, if the cursor is somewhere after the end of the command, completion will be triggered.
 - Issue #29: Sometimes there appears to be dangling spaces after the end of the command, this is an upstream bug/limitation.
-- Some shells react especially slowly, e.g. powershell. Increase feedkeys_delay to 1000 before opening an issue.
+- Some shells react especially slowly, e.g. powershell. Increase feedkeys_delay to 20000 before opening an issue.
 
 ## 💻 Contribution
 All PRs are welcome.
