@@ -83,6 +83,24 @@ local default_opts = {
         -- }
     },
 
+    -- If this function returns true, term-edit.nvim will use up and down arrow
+    -- to navigate as well as left and right arrow.
+    use_up_down_arrows = function()
+        return false
+        -- -- In certain environment, left and right arrows can not make the
+        -- -- cursor go to the previous or next line, but up and down arrows
+        -- -- can, one example is `ipython`.
+        -- -- Below is an example that works for ipython
+        --
+        -- -- get content for line under cursor
+        -- local line = vim.fn.getline(vim.fn.line '.')
+        -- if line:find(']:', 1, true) or line:find('...:', 1, true) then
+        --   return true
+        -- else
+        --   return false
+        -- end
+    end,
+
     -- Used to detect the start of the command
     -- prompt_end = no default, this is mandatory
 }
