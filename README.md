@@ -84,12 +84,13 @@ local default_opts = {
     },
 
     -- If this function returns true, term-edit.nvim will use up and down arrow
-    -- to navigate as well as left and right arrow.
+    -- to move the cursor as well as left and right arrow.
+    -- It will be called before terminal mode is entered and the cursor is moved.
     use_up_down_arrows = function()
         return false
-        -- -- In certain environment, left and right arrows can not make the
-        -- -- cursor go to the previous or next line, but up and down arrows
-        -- -- can, one example is `ipython`.
+        -- -- In certain environment, left and right arrows can not move the
+        -- -- cursor to the previous or next line, but up and down arrows can,
+        -- -- one example is ipython.
         -- -- Below is an example that works for ipython
         --
         -- -- get content for line under cursor
