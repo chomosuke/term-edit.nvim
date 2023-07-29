@@ -23,6 +23,7 @@ Normal mode: ~
 `dd`: Delete current line.
 `D`: Delete cursor til the end of line.
 `x`: Delete character under cursor.
+`X`: Delete character before cursor.
 `c<motion>`: Delete what `<motion>` includes and enter insert mode.
 `cc`: Delete current line and enter insert mode.
 `C`: Delete cursor til the end of line and enter insert mode.
@@ -39,6 +40,8 @@ Normal mode: ~
 Visual mode: ~
 `d`: Delete selection.
 `x`: Delete selection.
+`D`: Delete selected lines.
+`X`: Delete selected lines.
 `c`: Delete selection and enter insert mode.
 `p`: Delete selection and paste.
 `P`: Delete selection and paste.
