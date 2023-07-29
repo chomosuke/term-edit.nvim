@@ -40,8 +40,28 @@ function M.enable()
       async.quit_insert(adjust_cursor(start))
     end)
   end)
+  m.map('D', function()
+    local sl = vim.fn.line 'v'
+    local el = vim.fn.line '.'
+
+    if el < sl then
+      local temp = el
+      el = sl
+      sl = temp
+    end
+
+    local start = coord.find_line_start(sl)
+    local end_ = coord.find_line_end(el, true)
+    async.feedkeys('<Esc>', function()
+      delete.delete_range(start, end_, function()
+        async.quit_insert(adjust_cursor(start))
+      end)
+    end)
+  end, { mode = 'x' })
   m.remap('x', 'dl')
   m.remap('x', 'd', { mode = 'x' })
+  m.remap('X', 'dh')
+  m.remap('X', 'D', { mode = 'x' })
 end
 
 return M

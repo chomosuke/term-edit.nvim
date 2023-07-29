@@ -9,8 +9,10 @@ local function get_winwidth()
   return vim.fn.winwidth(0) - vim.fn.wincol() + vim.fn.col '.'
 end
 
-local function find_line_start()
-  local lnum = vim.fn.line '.'
+--- Get the coordinate for the start of the line
+--- @param lnum integer
+--- @return Coord
+function M.find_line_start(lnum)
   local winwidth = get_winwidth()
   local line = vim.fn.getline(lnum) --[[@as string]]
   while true do
@@ -47,10 +49,13 @@ local function find_line_start()
   end
 end
 
-local function find_line_end(include_cr)
+--- Get the coordinate for the end of the line
+--- @param lnum integer
+--- @param include_cr boolean
+--- @return Coord
+function M.find_line_end(lnum, include_cr)
   local winwidth = get_winwidth()
   local winheight = vim.fn.line '$'
-  local lnum = vim.fn.line '.'
   local line = vim.fn.getline(lnum) --[[@as string]]
   while #line == winwidth and lnum <= winheight do
     -- lnum don't end with <CR>
@@ -70,9 +75,9 @@ end
 ---@return Coord
 function M.get_coord(expr)
   if expr == '0' then
-    return find_line_start()
+    return M.find_line_start(vim.fn.line '.')
   elseif expr == '$' or expr == '$+' then
-    return find_line_end(expr == '$+')
+    return M.find_line_end(vim.fn.line '.', expr == '$+')
   else
     return { line = vim.fn.line(expr), col = vim.fn.col(expr) }
   end
