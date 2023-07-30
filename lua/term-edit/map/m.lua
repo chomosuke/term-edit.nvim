@@ -32,7 +32,7 @@ end
 
 ---map keys
 ---@param lhs string
----@param rhs function
+---@param rhs string|function
 ---@param opts? { mode?: string }
 function M.map(lhs, rhs, opts)
   opts = opts or {}
@@ -45,11 +45,16 @@ function M.map(lhs, rhs, opts)
   end
   lhs = nlhs
 
+  local drhs = rhs
+  if type(rhs) == 'function' then
+    drhs = function()
+      utils.debug_print('key', lhs, 'in mode', mode)
+      rhs()
+    end
+  end
+
   opts = vim.tbl_deep_extend('force', { buffer = true }, opts)
-  vim.keymap.set(mode, lhs, function()
-    utils.debug_print('key', lhs, 'in mode', mode)
-    rhs()
-  end, opts)
+  vim.keymap.set(mode, lhs, drhs, opts)
 end
 
 function M.remap(lhs, rhs, opts)
