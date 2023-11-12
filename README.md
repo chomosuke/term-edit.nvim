@@ -35,8 +35,8 @@ Plug 'chomosuke/term-edit.nvim', {'tag': 'v1.*'}
 ```
 
 ## 🛠️ Setup
+Calling `require 'term-edit'.setup(opts)` is **mandatory**
 ```lua
--- Calling require 'term-edit'.setup(opts) is mandatory
 require 'term-edit'.setup {
     -- Mandatory option:
     -- Set this to a lua pattern that would match the end of your prompt.
