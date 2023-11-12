@@ -143,7 +143,7 @@ It first looks for a complete match of lhs, so for the above example, it would
   If `mapping['n']['"+p'] == 'o'` it runs
     `vim.keymap.set('n', 'o', function() end)` instead.
   If `mapping['n']['"+p'] == false` it does not run `vim.keymap.set` at all.
-  If `mapping['n']['"+p'] == nil` it running the above code but not before
+  If `mapping['n']['"+p'] == nil` it runs the above code but not before
     checking each indivisual character.
     Say if `mapping['n']['p'] == 'o'` it would run
       `vim.keymap.set('n', '"+o', function() end)` instead.

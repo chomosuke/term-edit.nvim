@@ -1,10 +1,9 @@
-# term-edit.nvim
-Allowing you to edit your command in the terminal just like any other buffer.
-
-https://user-images.githubusercontent.com/38484873/213723395-356cdd51-0340-4741-9830-84970ada1913.mp4
+# Vim Keybindings in Neovim's Built-in Terminal
 
 No more smashing left and right arrow when you make a typo.\
-You can now smash `h` and `l` instead ;).
+You can now smash `h` and `l` instead 😉.
+
+https://user-images.githubusercontent.com/38484873/213723395-356cdd51-0340-4741-9830-84970ada1913.mp4
 
 ## 💪 Supported Actions
 - Enter insert: `i`, `a`, `A`, `I`.
