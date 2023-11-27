@@ -56,6 +56,12 @@ function M.setup(opts)
         callback = maybe_enable,
       },
     },
+    { -- allow `nvim -c :term` as OptionSet aren't triggered during startup
+      event = 'VimEnter',
+      opts = {
+        callback = maybe_enable,
+      },
+    },
   })
 
   maybe_enable() -- tolerate lazy loading
