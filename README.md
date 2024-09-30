@@ -103,15 +103,25 @@ local default_opts = {
 
     -- Used to detect the start of the command
     -- prompt_end = no default, this is mandatory
+
+    -- Set this to change the register that term-edit uses for yank and put.
+    default_reg = '"',
 }
 ```
 
 ## 🚫 Limitations
 - This plugin assumes there are no \<Tab\> though it might tolerate it.
-- This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than necessary. This can happen when it is instructed to go somewhere it can't reach or delete something not a part of the command. This may make your terminal beep if you have audio bell enabled.
-- The above limitation is worse in powershell and zsh, as for them, \<Right\> is set as confirm completion. As a result, if the cursor is somewhere after the end of the command, completion will be triggered.
-- Issue #29: Sometimes there appears to be dangling spaces after the end of the command, this is an upstream bug/limitation.
-- Some shells react especially slowly, e.g. powershell. Increase feedkeys_delay to 20000 before opening an issue.
+- This plugin might feed more \<Left\>, \<Right\> and \<BS\> to the shell than
+  necessary. This can happen when it is instructed to go somewhere it can't
+  reach or delete something not a part of the command. This may make your
+  terminal beep if you have audio bell enabled.
+- The above limitation is worse in PowerShell and zsh, as for them, \<Right\> is
+  set as confirm completion. As a result, if the cursor is somewhere after the
+  end of the command, completion will be triggered.
+- Issue #29: Sometimes there appears to be dangling spaces after the end of the
+  command, this is an upstream bug/limitation.
+- Some shells react especially slowly, e.g. PowerShell. Increase feedkeys_delay
+  to 20000 before opening an issue.
 
 ## 💻 Contribution
 All PRs are welcome.
