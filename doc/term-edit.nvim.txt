@@ -81,6 +81,10 @@ Default configuration: ~
     debug = false,
     feedkeys_delay = 10,
     mapping = {},
+    use_up_down_arrows = function()
+      return false
+    end,
+    default_reg = '"',
   }
 <
 Here's a list of configurations available in the `setup()` call
@@ -201,6 +205,12 @@ Below is an example value of this option that works with `ipython`.
   end
 <
   Type: `function() -> boolean`, Default: `function() return false end`
+
+*term-edit.default_reg*
+Set this to change the default register that term-edit will yank and put from.
+You might want to use this option if your default register isn't `"`.
+
+  Type: `string`, Default `'"'`
 
 ==============================================================================
  4. LIMITATIONS                                  *term-edit-limitation*

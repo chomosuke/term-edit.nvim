@@ -7,6 +7,7 @@ local M = {
     use_up_down_arrows = function()
       return false
     end,
+    default_reg = '"',
   },
 }
 
@@ -16,6 +17,7 @@ local M = {
 ---@field feedkeys_delay integer
 ---@field mapping { [string]: { [string]: string|false } }
 ---@field use_up_down_arrows function
+---@field default_reg string
 
 ---set options for term-edit
 ---@param opts TermEditOpts

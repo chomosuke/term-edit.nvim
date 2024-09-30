@@ -2,6 +2,7 @@ local utils = require 'term-edit.utils'
 local coord = require 'term-edit.coord'
 local insert = require 'term-edit.insert'
 local navigate = require 'term-edit.navigate'
+local config   = require 'term-edit.config'
 local M = {}
 
 local function delete_keys(len)
@@ -23,7 +24,7 @@ function M.delete_range(start, end_, callback)
     utils.inspect(end_)
   )
 
-  vim.fn.setreg('"', coord.get_text_between(start, end_))
+  vim.fn.setreg(config.opts.default_reg, coord.get_text_between(start, end_))
 
   if coord.before(end_, start) then
     utils.debug_print 'start end swap'
