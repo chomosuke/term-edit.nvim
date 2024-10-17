@@ -21,7 +21,7 @@ https://user-images.githubusercontent.com/38484873/213723395-356cdd51-0340-4741-
 ```lua
 {
     'chomosuke/term-edit.nvim',
-    lazy = false, -- or ft = 'toggleterm' if you use toggleterm.nvim
+    event = 'TermOpen',
     version = '1.*',
 }
 ```
